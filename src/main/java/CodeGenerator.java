@@ -9,23 +9,15 @@ public class CodeGenerator {
 	//ObjectIdentifier objectIdentifier= new ObjectIdentifier();
 	
 	//Basic shapes
-	public String drawBox(String colour, String size, String currentLocation, String relativeLocation) throws IOException{
+	public void drawBox(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("box");
-		
-		String cordinates="0.0 0.615 0.0";
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(currentLocation, relativeLocation,"box");
-		}
-		
 		//PrintWriter writer = new PrintWriter("new5.wrl", "UTF-8");
 		//writer.println("#VRML V2.0 utf8");
-		
-		
 		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -40,22 +32,16 @@ public class CodeGenerator {
 		"}");
 		//writer.close();
 		 System.out.println("Box drawn successfully!");	
-		 return cordinates;
 	}
 	
-	public String drawSphere(String colour, String size,String currentLocation, String relativeLocation) throws IOException{
+	public void drawSphere(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("sphere");
 
-		String cordinates="0.0 0.615 0.0";
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(currentLocation, relativeLocation,"sphere");
-		}
-		
 		ObjectIdentifier.writer.println("Transform {"+
-			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -70,22 +56,16 @@ public class CodeGenerator {
 		"}");
 	
 		 System.out.println("Sphere drawn successfully!");	
-		 return cordinates;
 	}
 	
-	public String drawCylinder(String colour, String size,String currentLocation, String relativeLocation) throws IOException{
+	public void drawCylinder(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("cylinder");
 
-		String cordinates="0.0 0.615 0.0";
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(currentLocation, relativeLocation,"cylinder");
-		}
-		
 		ObjectIdentifier.writer.println("Transform {"+
-			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -98,24 +78,19 @@ public class CodeGenerator {
 			    "}"+
 			"}"+
 		    "]"+
-		"}");	
-		 System.out.println("Cylinder drawn successfully!");
-		 return cordinates;
+		"}");
+	
+		 System.out.println("Cylinder drawn successfully!");	
 	}
 	
-	public String drawCone(String colour, String size,String currentLocation, String relativeLocation) throws IOException{
+	public void drawCone(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("cone");
 
-		String cordinates="0.0 0.615 0.0";
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(currentLocation, relativeLocation,"cone");
-		}
-		
 		ObjectIdentifier.writer.println("Transform {"+
-			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -130,33 +105,17 @@ public class CodeGenerator {
 		    "]"+
 		"}");
 	
-		 System.out.println("Cone drawn successfully!!");
-		 return cordinates;
+		 System.out.println("Cone drawn successfully!!");	
 	}
 	
 	//custom shapes
-	public String drawRoundTable(String colour, String size, String currentLocation,String relativeLocation) throws IOException{
+	public void drawRoundTable(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-		
-		String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
-		
-/*		String cordinate1= "0.0 0.615 0.0";
-		String cordinate2= "0.0 0.3075 0.0";
-		String cordinate3= "0.0 0.015 0.0";
-		String cordinate4= "0.0 0.045 0.0";*/
-		
-		//currentLocation is the center of the previously drawn object
-		//String[] cordinates is the default locations of the object
-		//Relative location defines the position, left, right etc.
-		
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(currentLocation, relativeLocation,"roundTable",cordinates);
-		}
 
 		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+ cordinates[0]+
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -171,8 +130,8 @@ public class CodeGenerator {
 		    "]"+
 		"}"+
 		"Transform {"+
-		    "translation "+cordinates[1]+
-		    " children ["+
+		    "translation 0.0 0.3075 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
 			   " geometry Box {"+
@@ -181,7 +140,7 @@ public class CodeGenerator {
 			"}"+
 		    "]}"+
 		"Transform {"+
-		    "translation "+cordinates[2]+
+		    "translation 0.0 0.015 0.0"+
 		    "children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
@@ -190,37 +149,24 @@ public class CodeGenerator {
 			    "}"+
 			"}]}"+
 		"Transform {"+
-		    "translation "+cordinates[3]+
-		    " children ["+
+		    "translation 0.0 0.045 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance USE " +colour +
 			    " geometry Box {"+
 				"size 0.35 0.03 0.35" +
 			    "}}]}");
 	
-		System.out.println("Round Table drawn successfully!");
-		return cordinates[0];
+		System.out.println("Table drawn successfully!");	
 	}
 	
-	public String drawSquareTable(String colour, String size, String currentLocation, String relativeLocation) throws IOException{
+	public void drawSquareTable(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 
-		String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
-		
-/*		String cordinate1= "0.0 0.615 0.0";
-		String cordinate2= "0.4 0.3075 0.4";
-		String cordinate3= "-0.4 0.3075 -0.4";
-		String cordinate4= "0.4 0.3075 -0.4";
-		String cordinate5= "-0.4 0.3075 0.4";*/
-		
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(currentLocation, relativeLocation,"squareTable",cordinates);
-		}
-		
 		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+cordinates[0]+
-		    " children ["+
+		    "translation 0.0 0.615 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -234,78 +180,44 @@ public class CodeGenerator {
 		    "]"+
 		"}"+
 		"Transform {"+
-		    "translation "+cordinates[1]+
-		    " children ["+
+		    "translation 0.0 0.3075 0.0"+
+		    "children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
 			   " geometry Box {"+
-				"size 0.05 0.57 0.05"+
+				"size 0.09 0.57 0.09"+
 			    "}"+
 			"}"+
 		    "]}"+
-			
 		"Transform {"+
-	    "translation "+cordinates[2]+
-	    " children ["+
-		"Shape {"+
-		    "appearance USE "+ colour+
-		   " geometry Box {"+
-			"size 0.05 0.57 0.05"+
-		    "}"+
-		"}"+
-	    "]}"+
+		    "translation 0.0 0.015 0.0"+
+		    "children ["+
+			"Shape {"+
+			    "appearance USE "+ colour+
+			    " geometry Box {"+
+				"size 0.5 0.03 0.5"+
+			    "}"+
+			"}]}"+
 		"Transform {"+
-	    "translation "+cordinates[3]+
-	    " children ["+
-		"Shape {"+
-		    "appearance USE "+ colour+
-		   " geometry Box {"+
-			"size 0.05 0.57 0.05"+
-		    "}"+
-		"}"+
-	    "]}"+
-		"Transform {"+
-	    "translation "+cordinates[4]+
-	    " children ["+
-		"Shape {"+
-		    "appearance USE "+ colour+
-		   " geometry Box {"+
-			"size 0.05 0.57 0.05"+
-		    "}"+
-		"}"+
-	    "]}");
+		    "translation 0.0 0.045 0.0"+
+		    "children ["+
+			"Shape {"+
+			    "appearance USE " +colour +
+			    " geometry Box {"+
+				"size 0.35 0.03 0.35" +
+			    "}}]}");
 	
-		System.out.println("Table drawn successfully!");
-		return cordinates[0];
+		System.out.println("Table drawn successfully!");	
 	}
 	
-	public String drawChair(String colour, String size, String currentLocation,String relativeLocation) throws IOException{
+	public void drawChair(String colour, String size) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-		
-		String[] cordinates={"0.0 0.5 0.0","0.1575 0.2485 0.1575","-0.1575 0.2485 0.1575","-0.1575 0.2485 -0.1575","0.1575 0.2485 -0.1575","0.1875 0.5 0.0","0.0 0.54 0.0","0.0 0.2275 0.0","0.0 0.2275 -0.083","0.0 0.2275 0.083","0.0 0.2275 -0.166","0.0 0.2275 0.166"};
-		
-		if(!currentLocation.equals(null)&&!currentLocation.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(currentLocation, relativeLocation,"chair",cordinates);
-		}
-		
-/*		String cordinate1= "0.0 0.5 0.0";
-		String cordinate2= "0.1575 0.2485 0.1575";
-		String cordinate3= "-0.1575 0.2485 0.1575";
-		String cordinate4= "-0.1575 0.2485 -0.1575";
-		String cordinate5= "0.1575 0.2485 -0.1575";
-		String cordinate6= "0.1875 0.5 0.0";
-		String cordinate7= "0.0 0.54 0.0";
-		String cordinate8= "0.0 0.2275 0.0";
-		String cordinate9= "0.0 0.2275 -0.083";
-		String cordinate10= "0.0 0.2275 0.083";
-		String cordinate11= "0.0 0.2275 -0.166";
-		String cordinate12= "0.0 0.2275 0.166";*/
 
 		ObjectIdentifier.writer.println("Transform {"+
 
-				    "translation " +cordinates[0]+
-				    " children [ "+
+				    "translation 0.0 0.5 0.0 "+
+				    "children [ "+
 					"Shape { "+
 					    "appearance DEF "+colour+ " Appearance { "+
 						"material Material { "+
@@ -316,33 +228,33 @@ public class CodeGenerator {
 					    "}}]}"+
 
 				"Transform { "+
-				    "translation "+cordinates[1]+
-				    " children [ "+
+				    "translation 0.1575 0.2485 0.1575 "+
+				    "children [ "+
 					"DEF Leg Shape { "+
 					    "appearance USE "+colour+
 					    " geometry Box {"+
 						"size 0.03 0.497 0.03 "+
 					    "}}]}"+
 				"Transform {"+
-				    "translation "+cordinates[2]+
-				    " children [ USE Leg ] "+
+				    "translation -0.1575 0.2485 0.1575 "+
+				    "children [ USE Leg ] "+
 				"} "+
 				"Transform { "+
-				    "translation "+cordinates[3]+
-				    " children [ USE Leg ] "+
+				    "translation -0.1575 0.2485 -0.1575 "+
+				    "children [ USE Leg ] "+
 				"}"+
 				"Transform { "+
-				    "translation "+cordinates[4]+
-				    " children [ USE Leg ] "+
+				    "translation 0.1575 0.2485 -0.1575 "+
+				    "children [ USE Leg ] "+
 				"} "+
 
 				"Transform { "+
-				    "translation "+cordinates[5]+
-				    " rotation 0.0 0.0 1.0 -0.17 "+
+				    "translation 0.1875 0.5 0.0 "+
+				    "rotation 0.0 0.0 1.0 -0.17 "+
 				    "children [ "+
 					"Transform { "+
-					    "translation "+cordinates[6]+
-					    " children [ "+
+					    "translation 0.0 0.54 0.0 "+
+					    "children [ "+
 						"Shape { "+
 						    "appearance USE "+colour+
 						    " geometry Box { "+
@@ -350,31 +262,30 @@ public class CodeGenerator {
 						    "}}]}"+
 
 					"Transform {"+
-					    "translation "+cordinates[7]+
-					    " children [ "+
+					    "translation 0.0 0.2275 0.0 "+
+					    "children [ "+
 						"DEF BackPole Shape { "+
 						    "appearance USE "+colour +
 						    " geometry Box { "+
 							"size 0.02 0.455 0.02 "+
 						    "}}]}"+
 					"Transform { "+
-					    "translation "+cordinates[8]+
-					    " children [ USE BackPole ] "+
+					    "translation 0.0 0.2275 -0.083 "+
+					    "children [ USE BackPole ] "+
 					"}"+
 					"Transform {"+
-					    "translation "+cordinates[9]+
-					    " children [ USE BackPole ] "+
+					    "translation 0.0 0.2275 0.083 "+
+					    "children [ USE BackPole ] "+
 					"}"+
 					"Transform { "+
-					    "translation "+cordinates[10]+
-					    " children [ USE BackPole ] "+
+					    "translation 0.0 0.2275 -0.166 "+
+					    "children [ USE BackPole ] "+
 					"}"+
 					"Transform {"+
-					    "translation "+cordinates[11]+
-					    " children [ USE BackPole ]"+
+					    "translation 0.0 0.2275 0.166"+
+					    "children [ USE BackPole ]"+
 					"}]}");
 	
-		 System.out.println("Chair drawn successfully!");
-		 return cordinates[0];
+		 System.out.println("Chair drawn successfully!");	
 	}
 }

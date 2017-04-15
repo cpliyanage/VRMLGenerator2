@@ -18,7 +18,7 @@ public class Interface {
 	private JTextField textField;
 	
 	//POSTagger posTagger = new POSTagger();
-	POSTagger taggerAndParser = new POSTagger();
+	TaggerAndParser taggerAndParser = new TaggerAndParser();
 
 	/**
 	 * Launch the application.

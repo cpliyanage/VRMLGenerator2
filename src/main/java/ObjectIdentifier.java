@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class ObjectIdentifier {
 	
@@ -12,63 +13,68 @@ public class ObjectIdentifier {
 	String currentLocation="";
 	static PrintWriter writer;
 	
-	public void defineObject(ArrayList<VRMLObject> vrmlObjects) throws IOException{
+	public void defineObject(HashMap<String,VRMLObject> vrmlObjects) throws IOException{
 		writer= new PrintWriter("generated.wrl", "UTF-8");
 		writer.println("#VRML V2.0 utf8");
 		
-		for(VRMLObject obj:vrmlObjects){
+		for (HashMap.Entry<String, VRMLObject> mapEntry : vrmlObjects.entrySet()) {
+		    String key = mapEntry.getKey();
+		    VRMLObject obj = mapEntry.getValue();
+		    
+		    System.out.println("Printing Map");
+		    System.out.println(obj.name);
+		    System.out.println(obj.colour);
+		    
 			String colour="black";
 			String size = "regular";
-			if(obj.attributes.size()>0){
-				for(String a:obj.attributes){
-					if(Arrays.asList(colours).contains(a)){
-						colour=a;
-					}
-					else if(Arrays.asList(sizes).contains(a)){
-						size=a;
-					}
-				}
+			
+			if((!(obj.colour==null))){
+				colour=obj.colour;
+			}
+			if((!(obj.size==null))){
+				colour=obj.size;
 			}
 			
 			//Basic shapes
-			if (!obj.name.equals(null) && obj.name.equalsIgnoreCase("box")){
+			if ((!(obj.name==null)) && obj.name.equalsIgnoreCase("box")){
 				System.out.println("Object box present");
-				currentLocation=codeGenerator.drawBox(colour,size,currentLocation,obj.location);
+				codeGenerator.drawBox(colour,size);
 			}
-			else if(!obj.name.equals(null)&&obj.name.equalsIgnoreCase("sphere")){
+			else if((!(obj.name==null))&&obj.name.equalsIgnoreCase("sphere")){
 				System.out.println("Object sphere present");
-				currentLocation=codeGenerator.drawSphere(colour,size,currentLocation,obj.location);				
+				codeGenerator.drawSphere(colour,size);				
 			}
-			else if(!obj.name.equals(null) && obj.name.equalsIgnoreCase("cone")){
+			else if((!(obj.name==null)) && obj.name.equalsIgnoreCase("cone")){
 				System.out.println("Object cone present");
-				currentLocation=codeGenerator.drawCone(colour,size,currentLocation,obj.location);
+				codeGenerator.drawCone(colour,size);
 			}
-			else if(!obj.name.equals(null) && obj.name.equalsIgnoreCase("cylinder")){
+			else if((!(obj.name==null)) && obj.name.equalsIgnoreCase("cylinder")){
 				System.out.println("Object cylinder present");
-				currentLocation=codeGenerator.drawCylinder(colour,size,currentLocation,obj.location);
+				codeGenerator.drawCylinder(colour,size);
 			}
 			
 			//Custom objects
 			else if(!obj.name.equals(null)&& obj.name.equalsIgnoreCase("table")){
-				if(obj.attributes.size()>0 && obj.attributes.contains("round")){
+				if((!(obj.type==null)) && !obj.type.equals("round")){
 					System.out.println("Round table present");
-					currentLocation=codeGenerator.drawRoundTable(colour,size,currentLocation,obj.location);
-				}else if(obj.attributes.size()>0 && obj.attributes.contains("square")){
+					codeGenerator.drawRoundTable(colour,size);
+				}else if((!(obj.type==null)) && !obj.type.equals("square")){
 					System.out.println("Square table present");
-					currentLocation=codeGenerator.drawSquareTable(colour,size,currentLocation,obj.location);
+					codeGenerator.drawSquareTable(colour,size);
 				}else{
 					System.out.println("Object table present");
-					currentLocation=codeGenerator.drawRoundTable(colour,size,currentLocation,obj.location);
+					codeGenerator.drawRoundTable(colour,size);
 				}
 			} 
 			
-			else if(!obj.name.equals(null) && obj.name.equalsIgnoreCase("chair")){
+			else if((!(obj.name==null)) && obj.name.equalsIgnoreCase("chair")){
 				System.out.println("Object chair present");
-				currentLocation=codeGenerator.drawChair(colour,size,currentLocation,obj.location);
-			}
-		}
+				codeGenerator.drawChair(colour,size);
+			} 
+		} 
 		
 		writer.close();
 		System.out.println("Successfully created file!");
 	}
 }
+
