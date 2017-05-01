@@ -28,8 +28,9 @@ public class TaggerAndParser {
 		String[] types= {"round","square"};
 		
 		ArrayList<String> objectNames = new ArrayList<String>();
-		ArrayList<VRMLNode> objectList = new ArrayList<VRMLNode>();
+		//ArrayList<VRMLNode> objectList = new ArrayList<VRMLNode>();
 		HashMap<String, VRMLNode> objectMap= new HashMap<String, VRMLNode>();
+		Tree tree=new Tree();
 		
 /*		VRMLObject currentElement;
 		VRMLObject modifiedElement;*/
@@ -352,8 +353,9 @@ public class TaggerAndParser {
 			    System.out.println("Printing Map");
 			    System.out.println(value.name);
 			    System.out.println(value.colour);
+			    tree.nodes.add(value);
 			}
-			objectIdentifier.defineObject(objectMap);
+			objectIdentifier.defineObject(tree);
 			return output;
 	}
 				
