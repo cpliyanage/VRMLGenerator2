@@ -22,10 +22,10 @@ public class TaggerAndParser {
 		String output="";
 		
 		//String locations[]={"left","right","above","below","front","behind","top", "under","on"};
-		String[] objects = { "table", "chair", "box","cone","sphere", "cylinder"};
+		String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
 		String[] colours= {"red", "green", "blue","brown","black", "white","small"};
 		String[] sizes = {"small","regular","large"};
-		String[] types= {"round","square"};
+		String[] types= {"round","square", "ceiling"};
 		
 		ArrayList<String> objectNames = new ArrayList<String>();
 		//ArrayList<VRMLNode> objectList = new ArrayList<VRMLNode>();
@@ -86,10 +86,10 @@ public class TaggerAndParser {
 		       System.out.println("Enhanced dependencies of the sentence");
 		       
 		       SemanticGraph enhancedDependencies=sentence.get(SemanticGraphCoreAnnotations.EnhancedDependenciesAnnotation.class);
-		       String basicDependenciesList = enhancedDependencies.toString(SemanticGraph.OutputFormat.LIST);
-			   System.out.println(basicDependenciesList);
+		       String enhancedDependenciesList = enhancedDependencies.toString(SemanticGraph.OutputFormat.LIST);
+			   System.out.println(enhancedDependenciesList);
 			   
-			   String[] dependencyArray = basicDependenciesList.split("\\n"); 
+			   String[] dependencyArray = enhancedDependenciesList.split("\\n"); 
 			   String dependencyType="";
 			   
 			   for (int i=0;i<dependencyArray.length;i++){
@@ -269,7 +269,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location left
-				   if(dependencyType.equals("acl:relcl")){
+				   /*if(dependencyType.equals("acl:relcl")){*/
 					   if(objectNames.contains(word1Name)&&word2Name.equals("left")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[i].split("\\(");
@@ -302,11 +302,43 @@ public class TaggerAndParser {
 							   }
 						   }
 						   
+					   }else if(word1Name.equals("left")&&objectNames.contains(word2Name)){
+						   for(int j=i+1;j<dependencyArray.length;j++){
+							   String[] innerSplit1= dependencyArray[i].split("\\(");
+							   dependencyType = innerSplit1[0];
+							   
+							   String[] innerSplit2 = innerSplit1[1].split(", ");
+							   
+							   String[] innerWord1 = innerSplit2[0].split("-");
+							   String innerWord1Name=innerWord1[0];
+							   String innerWord1Index=innerWord1[1];
+							   
+							   String[] innerWord2 = split2[1].split("-");
+							   String innerWord2Name=innerWord2[0];
+							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
+							   
+							   if(innerWord2Name.equals("left")&&objectNames.contains(innerWord1Name)){
+								   
+								   //getting of the child node
+								   modifiedNode=objectMap.get(word2Name);
+								   //getting the parent node
+								   parentNode=objectMap.get(innerWord1Name);
+								   
+								   modifiedNode.location="left"; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(word2Name, modifiedNode);
+								   
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put(innerWord1Name, parentNode);
+								   break;
+							   }
+						   }
+						   
 					   }
-				   }
+				   /*}*/
 				   
 				   //location right
-				   if(dependencyType.equals("compound")){
+				   /*if(dependencyType.equals("compound")){*/
 					   if(word1Name.equals("right")&&objectNames.contains(word2Name)){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[i].split("\\(");
@@ -340,7 +372,7 @@ public class TaggerAndParser {
 						   }
 						   
 					   }
-				   }
+				   /*}*/
 				   //end identifying locations
 			   }
 		     }

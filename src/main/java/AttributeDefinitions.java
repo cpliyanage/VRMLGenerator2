@@ -6,8 +6,8 @@ public class AttributeDefinitions {
 	Hashtable<String, String> colourTable = new Hashtable<String, String>();
 	Hashtable<String, String> sizeTable = new Hashtable<String, String>();
 	
-	   public void initializeColours() {
-	      // Create a hash map for colours
+	 // Create a hash map for colours   
+		public void initializeColours() {
 	      colourTable.put("red", "1.0 0.0 0.0");
 	      colourTable.put("green", "0.0 1.0 0.0");
 	      colourTable.put("blue", "0.0 0.0 1.0");
@@ -87,6 +87,7 @@ public class AttributeDefinitions {
 		   return newLocation;
 		   
 	   }
+	   
 	 //Get location of custom shapes
 	   public String[] getLocationOfCustomObject(String currentLocation , String relativeLocation,String shape,String[] oldCordinates){
 		   String[] newLocations={""};

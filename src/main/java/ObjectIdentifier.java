@@ -16,7 +16,7 @@ public class ObjectIdentifier {
 	String currentCordinates;
 	
 	public void defineObject(Tree tree) throws IOException{
-		writer= new PrintWriter("generated.wrl", "UTF-8");
+		writer= new PrintWriter("generated.wrl");
 		writer.println("#VRML V2.0 utf8");
 		
 	    // identifying root node
@@ -26,8 +26,6 @@ public class ObjectIdentifier {
 	            VRMLNode currentNode = tree.nodes.get(i);
 	            if(currentNode.isRoot()){
 	            	defineObjectRecursive(currentNode);
-	            }else{
-	            	continue;
 	            }
 	        }
 	    }
@@ -121,16 +119,46 @@ public class ObjectIdentifier {
 			currentCordinates=codeGenerator.drawChair(colour,size,parentCordinates,relativeLocation);
 			node.setCordinates(currentCordinates);
 		}
+		else if((!(node.name==null)) && (node.name).equalsIgnoreCase("sofa")){
+			System.out.println("Object sofa present");
+			currentCordinates=codeGenerator.drawSofa(colour,size,parentCordinates,relativeLocation);
+			node.setCordinates(currentCordinates);
+		}
 		
-		if(!(node.isLeaf())&& node.children.size()>0){
+		else if((!(node.name==null)) && (node.name).equalsIgnoreCase("bookshelf")){
+			System.out.println("Object bookshelf present");
+			currentCordinates=codeGenerator.drawBookshelf(colour,size,parentCordinates,relativeLocation);
+			node.setCordinates(currentCordinates);
+		}
+		
+		
+		else if(!node.name.equals(null)&& (node.name).equalsIgnoreCase("lamp")){
+			if((!(node.type==null)) && !node.type.equals("ceiling")){
+				System.out.println("Ceiling lamp present");
+				codeGenerator.drawCeilingLamp();
+			} else if((!(node.type==null)) && !node.type.equals("table")){
+				System.out.println("Table lamp present");
+				currentCordinates=codeGenerator.drawTableLamp(colour,size,parentCordinates,relativeLocation);
+				node.setCordinates(currentCordinates);
+			}else{
+				System.out.println("Table lamp present");
+				currentCordinates=codeGenerator.drawTableLamp(colour,size,parentCordinates,relativeLocation);
+				node.setCordinates(currentCordinates);
+			}
+		}
+		
+		else if((!(node.name==null)) && (node.name).equalsIgnoreCase("bed")){
+			System.out.println("Object bed present");
+			currentCordinates=codeGenerator.drawBed(colour,size,parentCordinates,relativeLocation);
+			node.setCordinates(currentCordinates);
+		}
+		
+		if(node.children.size()>0){
 			int childrenCount=node.children.size();
 			for(int j=0;j<childrenCount;j++){
 			defineObjectRecursive(node.children.get(j));
 			}
-		}else{
-			return;
-		} 
-	
+		}
 	}
 	
 }
