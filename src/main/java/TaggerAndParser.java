@@ -23,7 +23,7 @@ public class TaggerAndParser {
 		
 		//String locations[]={"left","right","above","below","front","behind","top", "under","on"};
 		String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
-		String[] colours= {"red", "green", "blue","brown","black", "white","small"};
+		String[] colours= {"red", "green", "blue","brown","black", "white"};
 		String[] sizes = {"small","regular","large"};
 		String[] types= {"round","square", "ceiling"};
 		
@@ -109,7 +109,7 @@ public class TaggerAndParser {
 				   				   
 				   //start identifying attributes
 				   
-				   if(dependencyType.equals("amod")||dependencyType.equals("compound")){
+				   if(dependencyType.equals("amod")||dependencyType.equals("compound")||dependencyType.equals("acl:relcl")){
 					   if(objectNames.contains(word1Name)){
 						   if(Arrays.asList(colours).contains(word2Name)){
 /*							   modifiedElement=objectMap.get(word1Name);
@@ -269,10 +269,9 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location left
-				   /*if(dependencyType.equals("acl:relcl")){*/
 					   if(objectNames.contains(word1Name)&&word2Name.equals("left")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
-							   String[] innerSplit1= dependencyArray[i].split("\\(");
+							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
 							   
 							   String[] innerSplit2 = innerSplit1[1].split(", ");
@@ -281,7 +280,7 @@ public class TaggerAndParser {
 							   String innerWord1Name=innerWord1[0];
 							   String innerWord1Index=innerWord1[1];
 							   
-							   String[] innerWord2 = split2[1].split("-");
+							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
@@ -302,9 +301,10 @@ public class TaggerAndParser {
 							   }
 						   }
 						   
-					   }else if(word1Name.equals("left")&&objectNames.contains(word2Name)){
+					   }
+					   else if(word1Name.equals("left")&&objectNames.contains(word2Name)){
 						   for(int j=i+1;j<dependencyArray.length;j++){
-							   String[] innerSplit1= dependencyArray[i].split("\\(");
+							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
 							   
 							   String[] innerSplit2 = innerSplit1[1].split(", ");
@@ -313,11 +313,11 @@ public class TaggerAndParser {
 							   String innerWord1Name=innerWord1[0];
 							   String innerWord1Index=innerWord1[1];
 							   
-							   String[] innerWord2 = split2[1].split("-");
+							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(innerWord2Name.equals("left")&&objectNames.contains(innerWord1Name)){
+							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("left")){
 								   
 								   //getting of the child node
 								   modifiedNode=objectMap.get(word2Name);
@@ -332,29 +332,7 @@ public class TaggerAndParser {
 								   objectMap.put(innerWord1Name, parentNode);
 								   break;
 							   }
-						   }
-						   
-					   }
-				   /*}*/
-				   
-				   //location right
-				   /*if(dependencyType.equals("compound")){*/
-					   if(word1Name.equals("right")&&objectNames.contains(word2Name)){
-						   for(int j=i+1;j<dependencyArray.length;j++){
-							   String[] innerSplit1= dependencyArray[i].split("\\(");
-							   dependencyType = innerSplit1[0];
-							   
-							   String[] innerSplit2 = innerSplit1[1].split(", ");
-							   
-							   String[] innerWord1 = innerSplit2[0].split("-");
-							   String innerWord1Name=innerWord1[0];
-							   String innerWord1Index=innerWord1[1];
-							   
-							   String[] innerWord2 = split2[1].split("-");
-							   String innerWord2Name=innerWord2[0];
-							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
-							   
-							   if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
+							   else if(innerWord1Name.equals("left")&&objectNames.contains(innerWord2Name)){
 								   
 								   //getting of the child node
 								   modifiedNode=objectMap.get(word2Name);
@@ -372,7 +350,89 @@ public class TaggerAndParser {
 						   }
 						   
 					   }
-				   /*}*/
+				   
+				   //location right
+					   if(objectNames.contains(word1Name)&&word2Name.equals("right")){
+						   for(int j=i+1;j<dependencyArray.length;j++){
+							   String[] innerSplit1= dependencyArray[j].split("\\(");
+							   dependencyType = innerSplit1[0];
+							   
+							   String[] innerSplit2 = innerSplit1[1].split(", ");
+							   
+							   String[] innerWord1 = innerSplit2[0].split("-");
+							   String innerWord1Name=innerWord1[0];
+							   String innerWord1Index=innerWord1[1];
+							   
+							   String[] innerWord2 = innerSplit2[1].split("-");
+							   String innerWord2Name=innerWord2[0];
+							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
+							   
+							   if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
+								   
+								   //getting of the child node
+								   modifiedNode=objectMap.get(word1Name);
+								   //getting the parent node
+								   parentNode=objectMap.get(innerWord2Name);
+								   
+								   modifiedNode.location="right"; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(word1Name, modifiedNode);
+								   
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put(innerWord2Name, parentNode);
+								   break;
+							   }
+						   }
+						   
+					   }
+					   else if(word1Name.equals("right")&&objectNames.contains(word2Name)){
+						   for(int j=i+1;j<dependencyArray.length;j++){
+							   String[] innerSplit1= dependencyArray[j].split("\\(");
+							   dependencyType = innerSplit1[0];
+							   
+							   String[] innerSplit2 = innerSplit1[1].split(", ");
+							   
+							   String[] innerWord1 = innerSplit2[0].split("-");
+							   String innerWord1Name=innerWord1[0];
+							   String innerWord1Index=innerWord1[1];
+							   
+							   String[] innerWord2 = innerSplit2[1].split("-");
+							   String innerWord2Name=innerWord2[0];
+							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
+							   
+							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("right")){
+								   
+								   //getting of the child node
+								   modifiedNode=objectMap.get(word2Name);
+								   //getting the parent node
+								   parentNode=objectMap.get(innerWord1Name);
+								   
+								   modifiedNode.location="right"; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(word2Name, modifiedNode);
+								   
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put(innerWord1Name, parentNode);
+								   break;
+							   }
+							   else if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
+								   
+								   //getting of the child node
+								   modifiedNode=objectMap.get(word2Name);
+								   //getting the parent node
+								   parentNode=objectMap.get(innerWord2Name);
+								   
+								   modifiedNode.location="right"; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(word2Name, modifiedNode);
+								   
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put(innerWord2Name, parentNode);
+								   break;
+							   }
+						   }
+						   
+					   }
 				   //end identifying locations
 			   }
 		     }

@@ -5,7 +5,7 @@ public class CodeGenerator {
 	//ObjectIdentifier objectIdentifier= new ObjectIdentifier();
 	
 	//Basic shapes
-	public String drawBox(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
+	public String drawBox(String colour, String size, String parentCordinates, String relativeLocation, String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("box");
@@ -13,7 +13,7 @@ public class CodeGenerator {
 		String cordinates;
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box");
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box",parentShape);
 		}else{
 			cordinates="0.0 0.615 0.0";
 		}
@@ -42,14 +42,14 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSphere(String colour, String size,String parentCordinates, String relativeLocation) throws IOException{
+	public String drawSphere(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("sphere");
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere");
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -72,14 +72,14 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCylinder(String colour, String size,String parentCordinates, String relativeLocation) throws IOException{
+	public String drawCylinder(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("cylinder");
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder");
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -102,14 +102,14 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCone(String colour, String size,String parentCordinates, String relativeLocation) throws IOException{
+	public String drawCone(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("cone");
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone");
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -134,27 +134,29 @@ public class CodeGenerator {
 	}
 	
 	//custom shapes
-	public String drawRoundTable(String colour, String size, String parentCordinates,String relativeLocation) throws IOException{
+	
+	//parentCordinates is the center of the parent object	
+	//String cordinates is the default locations of the object, i.e the origin	
+	//Relative location defines the position, left, right etc.
+	
+	//Object Round Table
+	public String drawRoundTable(String colour, String size, String parentCordinates,String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-		
-		String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
-		
-/*		String cordinate1= "0.0 0.615 0.0";
-		String cordinate2= "0.0 0.3075 0.0";
-		String cordinate3= "0.0 0.015 0.0";
-		String cordinate4= "0.0 0.045 0.0";*/
-		
-		//parentCordinates is the center of the previously drawn object
-		//String[] cordinates is the default locations of the object
-		//Relative location defines the position, left, right etc.
+	
+		String cordinates= "0.0 0.0 0.0";
+		String topCordinates = "0.0 0.615 0.0";
+		//String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates);
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates,parentShape);
 		}
 
-		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+ cordinates[0]+
+		ObjectIdentifier.writer.println("Transform { "+
+			"translation "+cordinates+
+			 " children [ "+
+			"Transform {"+
+		    "translation 0.0 0.615 0.0 "+
 		    " children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
@@ -170,7 +172,7 @@ public class CodeGenerator {
 		    "]"+
 		"}"+
 		"Transform {"+
-		    "translation "+cordinates[1]+
+		    "translation 0.0 0.3075 0.0"+
 		    " children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
@@ -180,7 +182,7 @@ public class CodeGenerator {
 			"}"+
 		    "]}"+
 		"Transform {"+
-		    "translation "+cordinates[2]+
+		    "translation 0.0 0.015 0.0 "+
 		    "children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
@@ -189,36 +191,36 @@ public class CodeGenerator {
 			    "}"+
 			"}]}"+
 		"Transform {"+
-		    "translation "+cordinates[3]+
+		    "translation 0.0 0.045 0.0"+
 		    " children ["+
 			"Shape {"+
 			    "appearance USE " +colour +
 			    " geometry Box {"+
 				"size 0.35 0.03 0.35" +
-			    "}}]}");
+			    "}}]}]}");
 	
 		System.out.println("Round Table drawn successfully!");
-		return cordinates[0];
+		return cordinates;
 	}
 	
-	public String drawSquareTable(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
+	//Object Square Table
+	public String drawSquareTable(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 
-		String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
-		
-/*		String cordinate1= "0.0 0.615 0.0";
-		String cordinate2= "0.4 0.3075 0.4";
-		String cordinate3= "-0.4 0.3075 -0.4";
-		String cordinate4= "0.4 0.3075 -0.4";
-		String cordinate5= "-0.4 0.3075 0.4";*/
+		String cordinates="0.0 0.0 0.0";
+		String topCordinates = "0.0 0.615 0.0";
+		//String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates);
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates,parentShape);
 		}
 		
-		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+cordinates[0]+
+		ObjectIdentifier.writer.println("Transform { "+
+			"translation "+cordinates+
+			" children [ "+
+			"Transform {"+
+		    "translation 0.0 0.615 0.0"+
 		    " children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
@@ -233,7 +235,7 @@ public class CodeGenerator {
 		    "]"+
 		"}"+
 		"Transform {"+
-		    "translation "+cordinates[1]+
+		    "translation 0.4 0.3075 0.4"+
 		    " children ["+
 			"Shape {"+
 			    "appearance USE "+ colour+
@@ -244,7 +246,7 @@ public class CodeGenerator {
 		    "]}"+
 			
 		"Transform {"+
-	    "translation "+cordinates[2]+
+	    "translation -0.4 0.3075 -0.4"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ colour+
@@ -254,7 +256,7 @@ public class CodeGenerator {
 		"}"+
 	    "]}"+
 		"Transform {"+
-	    "translation "+cordinates[3]+
+	    "translation 0.4 0.3075 -0.4"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ colour+
@@ -264,7 +266,7 @@ public class CodeGenerator {
 		"}"+
 	    "]}"+
 		"Transform {"+
-	    "translation "+cordinates[4]+
+	    "translation -0.4 0.3075 0.4"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ colour+
@@ -272,38 +274,30 @@ public class CodeGenerator {
 			"size 0.05 0.57 0.05"+
 		    "}"+
 		"}"+
-	    "]}");
+	    "]}]}");
 	
 		System.out.println("Table drawn successfully!");
-		return cordinates[0];
+		return cordinates;
 	}
 	
-	public String drawChair(String colour, String size, String parentCordinates,String relativeLocation) throws IOException{
+	//Object Chair
+	public String drawChair(String colour, String size, String parentCordinates,String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		
-		String[] cordinates={"0.0 0.5 0.0","0.1575 0.2485 0.1575","-0.1575 0.2485 0.1575","-0.1575 0.2485 -0.1575","0.1575 0.2485 -0.1575","0.1875 0.5 0.0","0.0 0.54 0.0","0.0 0.2275 0.0","0.0 0.2275 -0.083","0.0 0.2275 0.083","0.0 0.2275 -0.166","0.0 0.2275 0.166"};
-		
+		String cordinates= "0.0 0.0 0.0";
+		String topCordinates = "0.0 0.5 0.0";
+		//String[] cordinates={"0.0 0.5 0.0","0.1575 0.2485 0.1575","-0.1575 0.2485 0.1575","-0.1575 0.2485 -0.1575","0.1575 0.2485 -0.1575","0.1875 0.5 0.0","0.0 0.54 0.0","0.0 0.2275 0.0","0.0 0.2275 -0.083","0.0 0.2275 0.083","0.0 0.2275 -0.166","0.0 0.2275 0.166"};
+
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates);
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates,parentShape);
 		}
-		
-/*		String cordinate1= "0.0 0.5 0.0";
-		String cordinate2= "0.1575 0.2485 0.1575";
-		String cordinate3= "-0.1575 0.2485 0.1575";
-		String cordinate4= "-0.1575 0.2485 -0.1575";
-		String cordinate5= "0.1575 0.2485 -0.1575";
-		String cordinate6= "0.1875 0.5 0.0";
-		String cordinate7= "0.0 0.54 0.0";
-		String cordinate8= "0.0 0.2275 0.0";
-		String cordinate9= "0.0 0.2275 -0.083";
-		String cordinate10= "0.0 0.2275 0.083";
-		String cordinate11= "0.0 0.2275 -0.166";
-		String cordinate12= "0.0 0.2275 0.166";*/
 
-		ObjectIdentifier.writer.println("Transform {"+
-
-				    "translation " +cordinates[0]+
+		ObjectIdentifier.writer.println("Transform { "+
+				"translation "+cordinates+
+				" children [ "+
+					"Transform {"+ //chair seat
+				    "translation 0.0 0.5 0.0"+
 				    " children [ "+
 					"Shape { "+
 					    "appearance DEF "+colour+ " Appearance { "+
@@ -315,7 +309,7 @@ public class CodeGenerator {
 					    "}}]}"+
 
 				"Transform { "+
-				    "translation "+cordinates[1]+
+				    "translation 0.1575 0.2485 0.1575"+
 				    " children [ "+
 					"DEF Leg Shape { "+
 					    "appearance USE "+colour+
@@ -323,24 +317,24 @@ public class CodeGenerator {
 						"size 0.03 0.497 0.03 "+
 					    "}}]}"+
 				"Transform {"+
-				    "translation "+cordinates[2]+
+				    "translation -0.1575 0.2485 0.1575"+
 				    " children [ USE Leg ] "+
 				"} "+
 				"Transform { "+
-				    "translation "+cordinates[3]+
+				    "translation -0.1575 0.2485 -0.1575"+
 				    " children [ USE Leg ] "+
 				"}"+
 				"Transform { "+
-				    "translation "+cordinates[4]+
+				    "translation 0.1575 0.2485 -0.1575"+
 				    " children [ USE Leg ] "+
 				"} "+
 
 				"Transform { "+
-				    "translation "+cordinates[5]+
+				    "translation 0.1875 0.5 0.0"+
 				    " rotation 0.0 0.0 1.0 -0.17 "+
 				    "children [ "+
 					"Transform { "+
-					    "translation "+cordinates[6]+
+					    "translation 0.0 0.54 0.0"+
 					    " children [ "+
 						"Shape { "+
 						    "appearance USE "+colour+
@@ -349,7 +343,7 @@ public class CodeGenerator {
 						    "}}]}"+
 
 					"Transform {"+
-					    "translation "+cordinates[7]+
+					    "translation 0.0 0.2275 0.0"+
 					    " children [ "+
 						"DEF BackPole Shape { "+
 						    "appearance USE "+colour +
@@ -357,60 +351,61 @@ public class CodeGenerator {
 							"size 0.02 0.455 0.02 "+
 						    "}}]}"+
 					"Transform { "+
-					    "translation "+cordinates[8]+
+					    "translation 0.0 0.2275 -0.083"+
 					    " children [ USE BackPole ] "+
 					"}"+
 					"Transform {"+
-					    "translation "+cordinates[9]+
+					    "translation 0.0 0.2275 0.083"+
 					    " children [ USE BackPole ] "+
 					"}"+
 					"Transform { "+
-					    "translation "+cordinates[10]+
+					    "translation 0.0 0.2275 -0.166"+
 					    " children [ USE BackPole ] "+
 					"}"+
 					"Transform {"+
-					    "translation "+cordinates[11]+
+					    "translation 0.0 0.2275 0.166"+
 					    " children [ USE BackPole ]"+
-					"}]}");
+					"}]}]}");
 	
 		 System.out.println("Chair drawn successfully!");
-		 return cordinates[0];
+		 return cordinates;
 	}
 	
-	public String drawSofa(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
+	public String drawSofa(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 
-		String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
+		String cordinates="0.0 0.0 0.0";
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates);
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates,parentShape);
 		}
 		
-		ObjectIdentifier.writer.println("Group { "+
-		    "children [ "+
-		        "Shape { "+
+		ObjectIdentifier.writer.println("Transform { "+
+			"translation "+ cordinates+
+		    " children [ "+
+		        "Shape { "+ //sofa seat
 		            "appearance DEF "+colour+" Appearance { "+
 		                "material Material { "+
 		                "diffuseColor "+attributes.colourTable.get(colour)+
 		                " } } "+
 		            "geometry Box { "+
-		                "size 7.0  1.0  3.0"+
+		                "size 3.5  0.75  1.5"+
 		            " } } "+
 		        "Transform { "+
-		            "translation  0.0  0.75  -1.0"+
-		            "children [ "+
+		            "translation 0.0  0.75  -1.0"+
+		            " children [ "+
 		                "Shape { "+
 		                    "appearance USE "+colour+
 		                    " geometry Box { "+
-		                        "size 7.0  2.5  1.0"+
+		                        "size 3.5  2.25  0.5"+
 		                    " } } ] }, ] }");
 	
 		System.out.println("Sofa drawn successfully!");
-		return cordinates[0];
+		return cordinates;
 	}
 	
-	public String drawBookshelf(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
+	/*public String drawBookshelf(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 
@@ -580,8 +575,9 @@ public class CodeGenerator {
 	
 		System.out.println("Bookshelf drawn successfully!");
 		return cordinates[0];
-	}
+	} */
 	
+	//Object Ceiling Lamp
 	public void drawCeilingLamp() throws IOException{
 		ObjectIdentifier.writer.println("Inline { "+
 			   "url      \"ceilingLamp.wrl\" "+
@@ -590,17 +586,23 @@ public class CodeGenerator {
 		System.out.println("Ceiling lamp drawn successfully!");
 	}
 	
-	public String drawTableLamp(String colour, String size,String parentCordinates, String relativeLocation) throws IOException{
+	//Object Table Lamp
+	public String drawTableLamp(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("tableLamp");
 
-		String cordinates="0.0 0.615 0.0";
+		//Default location of the object
+		String cordinates="0.0 0.0 0.0";
+		
+		//Get location of the object relative to parent
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"tableLamp");
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"tableLamp",cordinates, parentShape);
 		}
 		
-		ObjectIdentifier.writer.println(
+		ObjectIdentifier.writer.println("Transform { "+
+			"translation "+ cordinates+
+			" children [ "+
 			"Transform { "+
 			  "translation 0.0 0.01 0.0 "+
 			  "rotation 1.0 0.0 0.0 1.571 "+
@@ -690,25 +692,29 @@ public class CodeGenerator {
 			                                        "} } "+
 			                                      "geometry Sphere { "+
 			                                        "radius 0.05 "+
-			                                      "} } ] } ] } ] } ] } ] } ] } ] } ] } ] } ] } ] } ");
+			                                      "} } ] } ] } ] } ] } ] } ] } ] } ] } ] } ] } ] } ] }");
 	
 		 System.out.println("Table Lamp drawn successfully!!");
-		 return cordinates;
+		 return cordinates; //Return the location where the object is drawn
 	}
 	
-	public String drawBed(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
+	public String drawBed(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-
-		String[] cordinates={"0.0 0.615 0.0","0.0 0.815 1.0","0.4 0.3075 1.0","-0.4 0.3075 -0.8","0.4 0.3075 -0.8","-0.4 0.3075 1.0"};
+		
+		String cordinates="0.0 0.0 0.0";
+		//String[] cordinates={"0.0 0.615 0.0","0.0 0.815 1.0","0.4 0.3075 1.0","-0.4 0.3075 -0.8","0.4 0.3075 -0.8","-0.4 0.3075 1.0"};
 		
 		//check whether relative location is given
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates);
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates,parentShape);
 		}
 		
-		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+cordinates[0]+
+		ObjectIdentifier.writer.println("Transform { "+
+			"translation "+ cordinates+
+			" children [ "+
+			"Transform {"+
+		    "translation 0.0 0.615 0.0"+
 		    " children ["+
 			"Shape { "+
 			    "appearance DEF " +colour+ " Appearance {"+
@@ -724,7 +730,7 @@ public class CodeGenerator {
 		"}"+
 		    
 		"Transform {"+
-	    "translation "+cordinates[1]+
+	    "translation 0.0 0.815 1.0"+
 	    " children ["+
 		"Shape {"+
 	    "appearance DEF " +"brown"+ " Appearance {"+
@@ -739,7 +745,7 @@ public class CodeGenerator {
 	    "]}"+
 		
 		"Transform {"+
-		    "translation "+cordinates[2]+
+		    "translation 0.4 0.3075 1.0"+
 		    " children ["+
 			"Shape {"+
 			"appearance USE "+ "brown"+ 
@@ -750,7 +756,7 @@ public class CodeGenerator {
 		    "]}"+
 			
 		"Transform {"+
-	    "translation "+cordinates[3]+
+	    "translation -0.4 0.3075 -0.8"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ "brown"+
@@ -760,7 +766,7 @@ public class CodeGenerator {
 		"}"+
 	    "]}"+
 		"Transform {"+
-	    "translation "+cordinates[4]+
+	    "translation 0.4 0.3075 -0.8"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ "brown"+
@@ -770,7 +776,7 @@ public class CodeGenerator {
 		"}"+
 	    "]}"+
 		"Transform {"+
-	    "translation "+cordinates[5]+
+	    "translation -0.4 0.3075 1.0"+
 	    " children ["+
 		"Shape {"+
 		    "appearance USE "+ "brown"+
@@ -778,9 +784,9 @@ public class CodeGenerator {
 			"size 0.05 0.57 0.05"+
 		    "}"+
 		"}"+
-	    "]}");
+	    "]}]}");
 	
 		System.out.println("Bed drawn successfully!");
-		return cordinates[0];
+		return cordinates;
 	}
 }

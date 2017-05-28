@@ -22,7 +22,7 @@ public class VRMLNode{
         this.children.add(child);
     }
 
-    public void addChild(String name) {
+/*    public void addChild(String name) {
         VRMLNode newChild = new VRMLNode(name);
         newChild.setParent(this);
         children.add(newChild);
@@ -34,7 +34,7 @@ public class VRMLNode{
         }
         this.children.addAll(children);
     }
-
+*/
     public List<VRMLNode> getChildren() {
         return children;
     }
