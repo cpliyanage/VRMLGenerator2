@@ -22,10 +22,11 @@ public class TaggerAndParser {
 	int objectCount = 0;
 	
 	//Hashmap to store coreference resolution results. Key=Object Id, Value=List of mentions of that object
-	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap= new HashMap<String, ArrayList<ObjectMention>>();
+	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
 	
 	public String tagContent(String input) throws IOException{
 		
+		objectMentionsMap= new HashMap<String, ArrayList<ObjectMention>>();
 		ObjectIdentifier objectIdentifier = new ObjectIdentifier();
 		Tree tree=new Tree();
 		ArrayList<String> objectNames = new ArrayList<String>();
@@ -85,8 +86,6 @@ public class TaggerAndParser {
 	    	 corefResult = currentCoref.toString();
 	    	 System.out.println(corefResult);
 	    	 
-	    	 objectCount++;
-	    	 String currentId="object"+objectCount;
 	    	 ArrayList<ObjectMention> mentionsList= new ArrayList<ObjectMention>();
 	    	 
 	    	 //Code to get the name and sentence number
@@ -106,24 +105,33 @@ public class TaggerAndParser {
 	    		 //For each word of a mention
 	    		 for(String word:words){
 	    			 if(Arrays.asList(objects).contains(word)){
+	    				 boolean objectPresent=checkObjectPresent(word,sentenceNumber);
+	    				 if(!objectPresent){
 	    				 //Adding the mention of the object to the mentions list
 	    		    	 ObjectMention currentMention= new ObjectMention();
 	    		    	 currentMention.name=word;
 	    		    	 currentMention.sentence=sentenceNumber;
 	    		    	 mentionsList.add(currentMention);
 	    		    	 break;
+	    				 }
 	    			 }
 	    		 }
 	    	 }
-	    	 
-	    	 //Adding the mentions of and object to the object mentions map	    	 
-	    	 objectMentionsMap.put(currentId, mentionsList);
-	    	 objectNames.add(mentionsList.get(0).name);
-	    	 
-	    	 //Add the object to the Object Map
-	    	 VRMLNode currentNode=new VRMLNode(currentId);
-	    	 currentNode.name=mentionsList.get(0).name;
-	    	 objectMap.put(currentId, currentNode);
+	    	 	    	 
+	    	 if(mentionsList.size()>0){
+	    		 
+	    		 objectCount++;
+		    	 String currentId="object"+objectCount;
+		    	 
+	    		//Adding the mentions of an object to the object mentions map
+		    	 objectMentionsMap.put(currentId, mentionsList);
+		    	 objectNames.add(mentionsList.get(0).name);
+	      	 
+		    	 //Add the object to the Object Map
+		    	 VRMLNode currentNode=new VRMLNode(currentId);
+		    	 currentNode.name=mentionsList.get(0).name;
+		    	 objectMap.put(currentId, currentNode);	    	 
+	    	 }
 	    	}
 	     
 	     System.out.println("Number of objects: " +objectCount);
@@ -567,10 +575,8 @@ public class TaggerAndParser {
 	}
 	
     //Method to get object Id by defining name and sentence
-    public String getObjectIdByName(String objName, int sentenceNum){
-    	
-    	String objectId="";
-		
+    public String getObjectIdByName(String objName, int sentenceNum){   	
+    	String objectId="";		
     	for (Entry<String, ArrayList<ObjectMention>> obj : objectMentionsMap.entrySet()) {
 		    String key = obj.getKey();
 		    ArrayList<ObjectMention> objMentions = obj.getValue();
@@ -582,6 +588,19 @@ public class TaggerAndParser {
 		}   	
     	return objectId;
     }
-				
+    
+    //Method to check whether the object is already added
+    public boolean checkObjectPresent(String objName, int sentenceNum){    	
+    	boolean objectPresent=false;		
+    	for (Entry<String, ArrayList<ObjectMention>> obj : objectMentionsMap.entrySet()) {		    
+		    ArrayList<ObjectMention> objMentions = obj.getValue();
+		    for(ObjectMention objMention:objMentions){
+		    	if((objMention.name.equals(objName))&&(objMention.sentence==sentenceNum)){
+		    		objectPresent=true;
+		    	}
+		    }
+		}   	
+    	return objectPresent;
+    }				
 }
 
