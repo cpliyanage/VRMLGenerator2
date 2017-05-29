@@ -2,19 +2,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VRMLNode{
-    String name = null;
-    List<VRMLNode> children = new ArrayList<VRMLNode>();
-    VRMLNode parent = null;
-    
-    //String name;
+	String id;//object Id
+    String name;
 	String location; // location relative to the parent
 	String colour;
 	String size;
 	String type;
 	String cordinates;
-
-    public VRMLNode(String name) {
-        this.name = name;
+	
+    List<VRMLNode> children = new ArrayList<VRMLNode>();
+    VRMLNode parent = null;
+    
+    public VRMLNode(String id) {
+        this.id = id;
     }
 
     public void addChild(VRMLNode child) {

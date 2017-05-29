@@ -33,6 +33,7 @@ public class ObjectIdentifier {
 	public void defineObjectRecursive(VRMLNode node) throws IOException{
 	    
 	    System.out.println("Printing Object Details");
+	    System.out.println("name: "+node.id);
 	    System.out.println("name: "+node.name);
 	    System.out.println("colour: "+node.colour);
 	    System.out.println("type: "+node.type);
@@ -40,7 +41,8 @@ public class ObjectIdentifier {
 	    System.out.println("relative location: "+node.location);
 	    
 	    if((!(node.parent==null))){
-	    System.out.println("parent: "+node.parent.name);
+	    System.out.println("parent Id: "+node.parent.id);
+	    System.out.println("parent Name: "+node.parent.name);
 	    }
 	    if((!(node.parent==null))&&(!(node.parent.cordinates==null))&&(!(node.parent.cordinates==""))){
 	    System.out.println("parent cordinates: "+node.parent.cordinates);
