@@ -19,14 +19,14 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class TaggerAndParser {
 	
-	int objectCount = 0;
-	
+	int objectCount;	
 	//Hashmap to store coreference resolution results. Key=Object Id, Value=List of mentions of that object
 	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
 	
 	public String tagContent(String input) throws IOException{
 		
 		objectMentionsMap= new HashMap<String, ArrayList<ObjectMention>>();
+		objectCount=0;
 		ObjectIdentifier objectIdentifier = new ObjectIdentifier();
 		Tree tree=new Tree();
 		ArrayList<String> objectNames = new ArrayList<String>();
@@ -51,13 +51,11 @@ public class TaggerAndParser {
 		for(String a:taggedWords){								
 			System.out.println(a);
 			current=a.split("_");
-
 			if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
 				objectNames.add(current[0]);		
 				currentNode = new VRMLNode(current[0]);
 				objectMap.put(current[0], currentNode);
 			}
-
 		}
 		
 		System.out.println(tagged.toString()); */
@@ -603,4 +601,3 @@ public class TaggerAndParser {
     	return objectPresent;
     }				
 }
-

@@ -24,20 +24,20 @@ public class AttributeDefinitions {
 			   sizeTable.put("regular", "size 0.4 0.4 0.4");
 			   sizeTable.put("large", "size 0.8 0.8 0.8");
 		   }
-		   if (shape.equalsIgnoreCase("sphere")||shape.equalsIgnoreCase("ball")){
-			   sizeTable.put("small", "radius 0.2");
-			   sizeTable.put("regular", "radius 0.4");
-			   sizeTable.put("large", "radius 0.8");
+		   if (shape.equalsIgnoreCase("sphere")){
+			   sizeTable.put("small", "radius 0.1");
+			   sizeTable.put("regular", "radius 0.2");
+			   sizeTable.put("large", "radius 0.4");
 		   }
 		   if (shape.equalsIgnoreCase("cone")){
-			   sizeTable.put("small", " bottomRadius 0.2 "+ "height 0.5 "+ "side TRUE "+ "bottom TRUE ");
-			   sizeTable.put("regular", " bottomRadius 0.4 "+ "height 1.0 "+ "side TRUE "+ "bottom TRUE ");
-			   sizeTable.put("large", " bottomRadius 0.8 "+ "height 2.0 "+ "side TRUE "+ "bottom TRUE ");
+			   sizeTable.put("small", " bottomRadius 0.1 "+ "height 0.25 "+ "side TRUE "+ "bottom TRUE ");
+			   sizeTable.put("regular", " bottomRadius 0.2 "+ "height 0.5 "+ "side TRUE "+ "bottom TRUE ");
+			   sizeTable.put("large", " bottomRadius 0.4 "+ "height 1.0 "+ "side TRUE "+ "bottom TRUE ");
 		   }
 		   if (shape.equalsIgnoreCase("cylinder")){
-			   sizeTable.put("small", " radius 0.2 " + "height 0.5 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
-			   sizeTable.put("regular", " radius 0.4 " + "height 1.0 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
-			   sizeTable.put("large", " radius 0.8 " + "height 2.0 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
+			   sizeTable.put("small", " radius 0.1 " + "height 0.25 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
+			   sizeTable.put("regular", " radius 0.2 " + "height 0.5 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
+			   sizeTable.put("large", " radius 0.4 " + "height 1.0 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
 		   }
 		   
 /*		   if (shape.equalsIgnoreCase("table")){
@@ -55,7 +55,7 @@ public class AttributeDefinitions {
 	   }
 	   
 	   //Get the new location of basic shapes
-	   public String getLocation(String parentCordinates , String relativeLocation,String shape, String parentShape){
+	   public String getLocation(String parentCordinates , String relativeLocation,String shape, String parentShape,String size){
 		   String newLocation;
 		   String arr[]=parentCordinates.split(" ");
 		   double x = Double.parseDouble(arr[0]);
@@ -89,14 +89,65 @@ public class AttributeDefinitions {
 			   z=z-3;
 		   }
 		   else if(relativeLocation.equals("on")){
-			   if(parentShape.equals("table")){
-				   y=y+0.615+0.2;
+			   if(shape.equals("box")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double radius =Double.parseDouble(sSplit[1]);
+				   if(parentShape.equals("table")){
+					   y=y+0.615+radius/2;
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+0.5+radius/2;
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y+0.175+radius/2;
+				   }
+				   else if(parentShape.equals("bed")){
+					   y=y+0.57+radius/2;
+				   }
+				   else{
+					   y=y+radius/2;
+				   }
 			   }
-			   else if(parentShape.equals("chair")){
-				   y=y+0.5+0.2;
+			   else if(shape.equals("sphere")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double radius =Double.parseDouble(sSplit[1]);
+				   if(parentShape.equals("table")){
+					   y=y+0.615+radius;
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+0.5+radius;
+				   }
+				   else if(parentShape.equals("bed")){
+					   y=y+0.57+radius;
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y+0.175+radius/2;
+				   }
+				   else{
+					   y=y+0.5+radius;
+				   }
 			   }
-			   else{
-				   y=y+0.5+0.2;
+			   else if(shape.equals("cone")||shape.equals("cylinder")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double height =Double.parseDouble(sSplit[4]);
+				   if(parentShape.equals("table")){
+					   y=y+0.615+height/2;
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+0.5+height/2;
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+0.57+height/2;
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y+0.175+height/2;
+				   }
+				   else{
+					   y=y+height/2;
+				   }
 			   }
 		   }
 		   
@@ -110,7 +161,7 @@ public class AttributeDefinitions {
 		   String newCordinates="";
 		   
 		   //Shape round table, square table and chair
-		   if(shape.equals("roundTable")||shape.equals("squareTable")||shape.equals("chair")){
+		   if(shape.equals("roundTable")||shape.equals("squareTable")||shape.equals("chair")||shape.equals("bed")){
 
 			   //Parent cordinates
 			   String arr1[]=parentCordinates.split(" ");

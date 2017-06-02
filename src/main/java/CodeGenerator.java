@@ -13,7 +13,7 @@ public class CodeGenerator {
 		String cordinates;
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box",parentShape);
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box",parentShape,size);
 		}else{
 			cordinates="0.0 0.615 0.0";
 		}
@@ -49,7 +49,7 @@ public class CodeGenerator {
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape);
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape,size);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -79,7 +79,7 @@ public class CodeGenerator {
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape);
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape,size);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -109,7 +109,7 @@ public class CodeGenerator {
 
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape);
+			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape,size);
 		}
 		
 		ObjectIdentifier.writer.println("Transform {"+
@@ -158,7 +158,7 @@ public class CodeGenerator {
 			"Transform {"+
 		    "translation 0.0 0.615 0.0 "+
 		    " children ["+
-			"Shape {"+
+			"Shape {"+ //Table Top
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
@@ -209,7 +209,6 @@ public class CodeGenerator {
 		attributes.initializeColours();
 
 		String cordinates="0.0 0.0 0.0";
-		String topCordinates = "0.0 0.615 0.0";
 		//String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
@@ -222,7 +221,7 @@ public class CodeGenerator {
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
 		    " children ["+
-			"Shape {"+
+			"Shape {"+ //Table Top
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
@@ -248,7 +247,7 @@ public class CodeGenerator {
 		"Transform {"+
 	    "translation -0.4 0.3075 -0.4"+
 	    " children ["+
-		"Shape {"+
+		"Shape {"+ // Table Leg
 		    "appearance USE "+ colour+
 		   " geometry Box {"+
 			"size 0.05 0.57 0.05"+
@@ -295,6 +294,7 @@ public class CodeGenerator {
 
 		ObjectIdentifier.writer.println("Transform { "+
 				"translation "+cordinates+
+				" rotation 0 1.5 0 1.5"+
 				" children [ "+
 					"Transform {"+ //chair seat
 				    "translation 0.0 0.5 0.0"+
@@ -390,192 +390,20 @@ public class CodeGenerator {
 		                "diffuseColor "+attributes.colourTable.get(colour)+
 		                " } } "+
 		            "geometry Box { "+
-		                "size 3.5  0.75  1.5"+
+		                "size 1.5  0.35  0.75"+
 		            " } } "+
 		        "Transform { "+
-		            "translation 0.0  0.75  -1.0"+
+		            "translation 0.0  0.25  -0.5"+
 		            " children [ "+
 		                "Shape { "+
 		                    "appearance USE "+colour+
 		                    " geometry Box { "+
-		                        "size 3.5  2.25  0.5"+
+		                        "size 1.5  0.85  0.35"+
 		                    " } } ] }, ] }");
 	
 		System.out.println("Sofa drawn successfully!");
 		return cordinates;
 	}
-	
-	/*public String drawBookshelf(String colour, String size, String parentCordinates, String relativeLocation) throws IOException{
-		AttributeDefinitions attributes= new AttributeDefinitions();
-		attributes.initializeColours();
-
-		String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
-		
-		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
-			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bookshelf",cordinates);
-		}
-		
-		ObjectIdentifier.writer.println("#VRML V1.0 ascii \n"+
-				"Separator { "+
-				"Transform { "+
-				"rotation	0 1 0  4.71239 "+
-				"center	0.745 -1.00239 0.000395298 } "+
-				"Separator { "+
-				"Translation { "+
-				"translation	0 -4 0 } "+
-				"Scale { "+
-				"scaleFactor	1 0.75 1 } "+
-				"Separator { "+
-				"Translation { "+
-				"translation	0 8 0 } "+
-	    
-				"DEF BookshelfBase Separator { "+
-				"Separator { "+
-				"Translation { "+
-				"translation	0.75 0.333 0 } "+
-				"Cube { "+
-				"width	1.5 "+
-				"height	0.333 "+
-				"depth	8 } } "+
-				"Separator { "+
-				"Translation { "+
-				"translation	0.70835 0.125 0 } "+
-				"Cube { "+
-				"width	1.4167 "+
-				"height	0.0833 "+
-				"depth	7.833 } } "+
-				"Separator { "+
-				"Translation { "+
-				"translation	0.667 0.04167 0 } "+
-				"Cube { "+
-				"width	1.333 "+
-				"height	0.0833 "+
-				"depth	7.75 "+
-		   		"} } } } "+
-		   		"Separator { "+
-		   		"Rotation { "+
-		   		"rotation	1 0 0  3.14 } "+
-		   		"USE BookshelfBase } "+
-		   		"Separator { "+
-		   		"Translation { "+
-		   		"translation	0 4 0 } "+
-		   		"Cube { "+
-		   		"width	0.02 "+
-		   		"height	8 "+
-		   		"depth	7.5 } } "+
-		   		"Separator { "+
-		   		"Translation { "+
-		   		"translation	0.5625 0.25 0 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	0.04167 "+
-		   		"depth	7.4167 } "+
-		   		"Translation { "+
-		   		"translation	0 2 0 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	0.04167 "+
-		   		"depth	7.4167 } "+
-		   		"Translation { "+
-		   		"translation	0 2 0 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	0.04167 "+
-		   		"depth	7.4167 } "+
-		   		"Translation { "+
-		   		"translation	0 2 0 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	0.04167 "+
-		   		"depth	7.4167 } } "+
-		   		"Separator { "+
-		   		"Separator { "+
-		   		"Translation { "+
-		   		"translation	1.1458 0.125 0 } "+
-		   		"Cube { "+
-		   		"width	0.04167 "+
-		   		"height	0.25 "+
-		   		"depth	7.5833 } "+
-		   		"Translation { "+
-		   		"translation	0 7.75 0 } "+
-		   		"Cube { "+
-		   		"width	0.04167 "+
-		   		"height	0.25 "+
-		   		"depth	7.5833 } "+
-		   		"Translation { "+
-		   		"translation	0 -3.875 3.67 } "+
-		   		"Cube { "+
-		   		"width	0.04167 "+
-		   		"height	7.5 "+
-		   		"depth	0.25 } "+
-		   		"Translation { "+
-		   		"translation	0 0 -3.67 } "+
-		   		"Cube { "+
-		   		"width	0.04167 "+
-		   		"height	7.5 "+
-		   		"depth	0.25 } "+
-		   		"Translation { "+
-		   		"translation	0 0 -3.67 } "+
-		   		"Cube { "+
-		   		"width	0.04167 "+
-		   		"height	7.5 "+
-		   		"depth	0.25 } } "+
-	    
-		   		"Translation { "+
-		   		"translation	0.5625 4 3.7 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	8 "+
-		   		"depth	0.0833 } "+
-		   		"Translation { "+
-		   		"translation 0 0 -3.7 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	8 "+
-		   		"depth	0.0833 } "+
-	    
-		   		"Translation { "+
-		   		"translation	0 0 -3.7 } "+
-		   		"Cube { "+
-		   		"width	1.125 "+
-		   		"height	8 "+
-		   		"depth	0.0833 } "+ 
-		   		"DEF SideFrame Separator { "+
-		   		"Translation { "+
-		   		"translation	0.4375 0 -0.0625 } "+
-		
-		   		"Cube { "+
-		   		"width	0.25 "+
-		   		"height	8 "+
-		   		"depth	0.04167 } "+
-		   		"Translation { "+
-		   		"translation	-0.875 0 0 } "+
-		   		"Cube { "+
-		   		"width	0.25 "+
-		   		"height	8 "+
-		   		"depth	0.04167 } "+
-		   		"Translation { "+
-		   		"translation	0.4375 3.875 0 } "+
-		   		"Cube { "+ 
-		   		"width	0.625 "+
-		   		"height	0.25 "+
-		   		"depth	0.04167 } "+
-		   		"Translation { "+
-		   		"translation	0 -7.75 0 } "+
-		   		
-		   		"Cube { "+
-		   		"width	0.625 "+
-		   		"height	0.25 "+
-		   		"depth	0.04167 } } "+
-	    
-		   		"Translation { "+
-		   		"translation	0 0 7.5 } "+
-		   		"USE SideFrame "+
-		   		"} } } ");
-	
-		System.out.println("Bookshelf drawn successfully!");
-		return cordinates[0];
-	} */
 	
 	//Object Ceiling Lamp
 	public void drawCeilingLamp() throws IOException{
@@ -712,6 +540,7 @@ public class CodeGenerator {
 		
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
+			" rotation 0 3 0 3"+
 			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
