@@ -59,11 +59,12 @@ public class TaggerAndParser {
 		ObjectIdentifier objectIdentifier = new ObjectIdentifier();
 		Tree tree=new Tree();
 		ArrayList<String> objectNames = new ArrayList<String>();
-		HashMap<String, VRMLNode> objectMap= new HashMap<String, VRMLNode>();	
+		HashMap<String, VRMLNode> objectMap= new HashMap<String, VRMLNode>();
+		ArrayList<String> nounsPresent = new ArrayList<String>();
 		
 		String output="";
 		
-/*		//POS tagger start
+		//POS tagger start
 		MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
 		String tagged = tagger.tagString(input);
 		//POS tagger end
@@ -74,14 +75,17 @@ public class TaggerAndParser {
 		for(String a:taggedWords){								
 			System.out.println(a);
 			current=a.split("_");
-			if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
+			if(current[1].equals("NN")){
+				nounsPresent.add(current[0]);
+			}
+			/*if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
 				objectNames.add(current[0]);		
 				currentNode = new VRMLNode(current[0]);
 				objectMap.put(current[0], currentNode);
-			}
+			} */
 		}
 		
-		System.out.println(tagged.toString()); */
+		System.out.println(tagged.toString()); 
 		
 		//Stanford CoreNLP start
 		
@@ -139,35 +143,35 @@ public class TaggerAndParser {
 	    			 }
 	    			 else{
 	    				 //Check synonyms to get the object name
-	    				 String synonym =getSynonyms(dict,word,"object");
-	    				 if(!synonym.equals("")){
-
-		    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
-		    				 if(!objectPresent){
-		    				 //Adding the mention of the object to the mentions list
-		    		    	 ObjectMention currentMention= new ObjectMention();
-		    		    	 currentMention.name=synonym;
-		    		    	 currentMention.sentence=sentenceNumber;
-		    		    	 mentionsList.add(currentMention);
-		    		    	 break;
-		    				 }
-		    			 
-	    				 }else{
-	    					 //Check Hypernyms to get object name
-	    					 String hypernym=getHypernyms(dict,word,"object");
-	    					 if(!hypernym.equals("")){
-
-			    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+	    				 if(nounsPresent.contains(word)){
+		    				 String synonym =getSynonyms(dict,word,"object");
+		    				 if(!synonym.equals("")){
+			    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
 			    				 if(!objectPresent){
 			    				 //Adding the mention of the object to the mentions list
 			    		    	 ObjectMention currentMention= new ObjectMention();
-			    		    	 currentMention.name=hypernym;
+			    		    	 currentMention.name=synonym;
 			    		    	 currentMention.sentence=sentenceNumber;
 			    		    	 mentionsList.add(currentMention);
 			    		    	 break;
 			    				 }
-			    			 
 		    				 }
+	    				 }else{
+	    					 //Check Hypernyms to get object name
+		    					 if(nounsPresent.contains(word)){
+		    					 String hypernym=getHypernyms(dict,word,"object");
+		    					 if(!hypernym.equals("")){
+				    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+				    				 if(!objectPresent){
+				    				 //Adding the mention of the object to the mentions list
+				    		    	 ObjectMention currentMention= new ObjectMention();
+				    		    	 currentMention.name=hypernym;
+				    		    	 currentMention.sentence=sentenceNumber;
+				    		    	 mentionsList.add(currentMention);
+				    		    	 break;
+				    				 }
+		    					 }
+			    			}
 	    				 }
 	    			 }
 	    		 }
@@ -334,7 +338,7 @@ public class TaggerAndParser {
 				   //start identifying locations
 				   
 				   //location on
-				   if(dependencyType.equals("nmod:on")){
+				   else if(dependencyType.equals("nmod:on")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   
 						   //getting of the child node
@@ -359,7 +363,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location under
-				   if(dependencyType.equals("nmod:under")){
+				   else if(dependencyType.equals("nmod:under")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
@@ -378,7 +382,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location behind
-				   if(dependencyType.equals("nmod:behind")){
+				   else if(dependencyType.equals("nmod:behind")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
@@ -397,7 +401,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location front
-				   if(dependencyType.equals("nmod:in")){
+				   else if(dependencyType.equals("nmod:in")){
 					   if(objectNames.contains(word1Name)&&word2Name.equals("front")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[i].split("\\(");
@@ -441,7 +445,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location above
-				   if(dependencyType.equals("nmod:above")){
+				   else if(dependencyType.equals("nmod:above")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
@@ -463,7 +467,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location below
-				   if(dependencyType.equals("nmod:below")){
+				   else if(dependencyType.equals("nmod:below")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
@@ -736,7 +740,7 @@ public class TaggerAndParser {
 		if(wordType.equals("object")){		
 			// look up first sense of the word 
 			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -754,10 +758,10 @@ public class TaggerAndParser {
 		}
 		
 		//Get synonym of colours
-		if(wordType.equals("colour")){
+		else if(wordType.equals("colour")){
 			// look up first sense of the word 
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -775,11 +779,11 @@ public class TaggerAndParser {
 		}
 		
 		//Get synonym of sizes
-		if(wordType.equals("size")){
-			String sizeName="";
+		else if(wordType.equals("size")){
+			
 			// look up first sense of the word 
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -797,11 +801,11 @@ public class TaggerAndParser {
 		}
 		
 		//Get synonyms of types
-		if(wordType.equals("type")){
+		else if(wordType.equals("type")){
 			String typeName="";
 			// look up first sense of the word 
-			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
-			if(idxWord . getWordIDs ().size()>0){
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE);
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -830,7 +834,7 @@ public class TaggerAndParser {
 		if( wordType.equals("object")){
 			// get the synset
 			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -855,10 +859,10 @@ public class TaggerAndParser {
 		}
 		
 		//Get hypernym of colour
-		if( wordType.equals("colour")){
+		else if( wordType.equals("colour")){
 			// get the synset
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -883,10 +887,10 @@ public class TaggerAndParser {
 		}
 		
 		//Get hypernym of size
-		if( wordType.equals("size")){
+		else if( wordType.equals("size")){
 			// get the synset
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
@@ -911,10 +915,10 @@ public class TaggerAndParser {
 		}
 		
 		//Get hypernym of type
-		if( wordType.equals("type")){
+		else if( wordType.equals("type")){
 			// get the synset
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
-			if(idxWord . getWordIDs ().size()>0){
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
 			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
 			IWord word = dict . getWord ( wordID );
 			ISynset synset = word . getSynset ();
