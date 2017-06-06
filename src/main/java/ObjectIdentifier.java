@@ -14,6 +14,51 @@ public class ObjectIdentifier {
 	public void defineObject(Tree tree) throws IOException{
 		writer= new PrintWriter("generated.wrl");
 		writer.println("#VRML V2.0 utf8");
+		/*writer.println("Transform{ "+
+			"translation 0 0 -20.0 "+
+			"children[ "+
+			"Shape { "+
+				"appearance Appearance { "+
+					"material Material { } "+
+				"} "+
+				"geometry Box { size 50.0 20.0 0.5 } "+
+			"} ] } "+		
+			"Transform{ "+
+			"translation -25.0 0 -10.0 "+
+			"children[ "+
+			"Shape { "+
+				"appearance Appearance { "+
+					"material Material { } "+
+				"} "+
+				"geometry Box { size 0.5 20.0 20.0 } "+
+			"}]} "+			
+			"Transform{ "+
+			"translation 25.0 0 -10.0 "+
+			"children[ "+
+			"Shape { "+
+				"appearance Appearance { "+
+					"material Material { } "+
+				"} "+
+				"geometry Box {size 0.5 20.0 20.0 } "+
+			"}]} "+			
+			"Transform{ "+
+			"translation 0 -10.0 -10.0 "+
+			"children[ "+
+			"Shape { "+
+				"appearance Appearance { "+
+					"material Material{} "+
+				"} "+
+				"geometry Box { size 50.0 0.5 20.0 } "+
+			"}]} "+			
+			"Transform{ "+
+			"translation 0 10.0 -10.0 "+
+			"children[ "+
+			"Shape { "+
+				"appearance Appearance { "+
+					"material Material{} "+			
+				"} "+
+				"geometry Box { size 50.0 0.5 20.0 } "+
+			"}]} "); */
 		
 	    // identifying root node
 	    int childCount = tree.getChildCount();

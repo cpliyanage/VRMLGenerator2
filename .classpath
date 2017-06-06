@@ -36,5 +36,6 @@
 	<classpathentry kind="lib" path="D:/Uni/4th year project/Libraries and Software/stanford-corenlp-full-2016-10-31/stanford-corenlp-3.7.0-models.jar"/>
 	<classpathentry kind="lib" path="D:/Uni/4th year project/Libraries and Software/stanford-corenlp-full-2016-10-31/ejml-0.23.jar"/>
 	<classpathentry kind="lib" path="D:/Uni/4th year project/Libraries and Software/stanford-postagger-2016-10-31/stanford-postagger-2016-10-31/stanford-postagger-3.7.0.jar"/>
+	<classpathentry kind="lib" path="D:/Uni/4th year project/Libraries and Software/edu.mit.jwi_2.4.0_jdk.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

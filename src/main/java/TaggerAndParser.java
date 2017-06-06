@@ -1,12 +1,24 @@
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import edu.mit.jwi.Dictionary;
+import edu.mit.jwi.IDictionary;
+import edu.mit.jwi.item.IIndexWord;
+import edu.mit.jwi.item.ISynset;
+import edu.mit.jwi.item.ISynsetID;
+import edu.mit.jwi.item.IWord;
+import edu.mit.jwi.item.IWordID;
+import edu.mit.jwi.item.POS;
+import edu.mit.jwi.item.Pointer;
 import edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
@@ -18,12 +30,29 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
 
 public class TaggerAndParser {
-	
-	int objectCount;	
+		
 	//Hashmap to store coreference resolution results. Key=Object Id, Value=List of mentions of that object
 	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
+	int objectCount;
+	
+	//String locations[]={"left","right","above","below","front","behind","top", "under","on"};
+	String[] roomLocations={"middle"};
+	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
+	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
+	static String[] sizes = {"small","regular","large"};
+	static String[] types= {"round","square", "ceiling"};
+
 	
 	public String tagContent(String input) throws IOException{
+		
+		// construct the URL to the Wordnet dictionary directory
+		String wnhome = System.getenv("WNHOME");
+		String path = wnhome + File.separator + "dict";
+		URL url = new URL("file", null , path );
+		
+		// construct the dictionary object and open it
+		IDictionary dict = new Dictionary ( url);
+		dict.open();
 		
 		objectMentionsMap= new HashMap<String, ArrayList<ObjectMention>>();
 		objectCount=0;
@@ -34,12 +63,6 @@ public class TaggerAndParser {
 		
 		String output="";
 		
-		//String locations[]={"left","right","above","below","front","behind","top", "under","on"};
-		String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
-		String[] colours= {"red", "green", "blue","brown","black", "white"};
-		String[] sizes = {"small","regular","large"};
-		String[] types= {"round","square", "ceiling"};
-
 /*		//POS tagger start
 		MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
 		String tagged = tagger.tagString(input);
@@ -61,6 +84,7 @@ public class TaggerAndParser {
 		System.out.println(tagged.toString()); */
 		
 		//Stanford CoreNLP start
+		
 		// creates a StanfordCoreNLP object, with POS tagging, lemmatization, NER, parsing, and coreference resolution
 		 Properties props = new Properties();
 	     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref");
@@ -113,9 +137,47 @@ public class TaggerAndParser {
 	    		    	 break;
 	    				 }
 	    			 }
+	    			 else{
+	    				 //Check synonyms to get the object name
+	    				 String synonym =getSynonyms(dict,word,"object");
+	    				 if(!synonym.equals("")){
+
+		    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
+		    				 if(!objectPresent){
+		    				 //Adding the mention of the object to the mentions list
+		    		    	 ObjectMention currentMention= new ObjectMention();
+		    		    	 currentMention.name=synonym;
+		    		    	 currentMention.sentence=sentenceNumber;
+		    		    	 mentionsList.add(currentMention);
+		    		    	 break;
+		    				 }
+		    			 
+	    				 }else{
+	    					 //Check Hypernyms to get object name
+	    					 String hypernym=getHypernyms(dict,word,"object");
+	    					 if(!hypernym.equals("")){
+
+			    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+			    				 if(!objectPresent){
+			    				 //Adding the mention of the object to the mentions list
+			    		    	 ObjectMention currentMention= new ObjectMention();
+			    		    	 currentMention.name=hypernym;
+			    		    	 currentMention.sentence=sentenceNumber;
+			    		    	 mentionsList.add(currentMention);
+			    		    	 break;
+			    				 }
+			    			 
+		    				 }
+	    				 }
+	    			 }
 	    		 }
 	    	 }
+	    	 
+	    	 //End making mention list
 	    	 	    	 
+	    	 //Create a VRML node for the object
+	    	 //Add to object ID-Mention Map
+	    	//Add to object ID-VRML Node Map
 	    	 if(mentionsList.size()>0){
 	    		 
 	    		 objectCount++;
@@ -180,26 +242,90 @@ public class TaggerAndParser {
 				   String objectId1;
 				   String objectId2;
 				   
+				   //Identifying colour
 				   if(dependencyType.equals("amod")||dependencyType.equals("compound")||dependencyType.equals("acl:relcl")){
 					   if(objectNames.contains(word1Name)){
+						   
+						   //Identifying the colour of the object
 						   if(Arrays.asList(colours).contains(word2Name)){
 							   //modifiedNode=objectMap.get(word1Name);
 							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.colour=word2Name;
 							   objectMap.put(objectId1, modifiedNode);							   
+						   }else{
+				  				 //Check synonyms
+			    				 String synonym =getSynonyms(dict,word2Name,"colour");
+			    				 if(!synonym.equals("")){
+									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.colour=synonym;
+									   objectMap.put(objectId1, modifiedNode);
+				    			}else{
+			    					 //Check Hypernyms 
+			    					 String hypernym=getHypernyms(dict,word2Name,"colour");
+			    					 if(!hypernym.equals("")){
+										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   modifiedNode=objectMap.get(objectId1);
+										   modifiedNode.colour=hypernym;
+										   objectMap.put(objectId1, modifiedNode);
+				    				 }			    				 
+				    			}
 						   }
+						   
+						   //Identifying the size of the object
 						   if(Arrays.asList(sizes).contains(word2Name)){							   
 							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.size=word2Name;
 							   objectMap.put(objectId1, modifiedNode);
+						   }else{
+
+				  				 //Check synonyms 
+			    				 String synonym =getSynonyms(dict,word2Name,"size");
+			    				 if(!synonym.equals("")){
+									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.size=synonym;
+									   objectMap.put(objectId1, modifiedNode);
+				    			}else{
+			    					 //Check Hypernyms
+			    					 String hypernym=getHypernyms(dict,word2Name,"size");
+			    					 if(!hypernym.equals("")){
+										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   modifiedNode=objectMap.get(objectId1);
+										   modifiedNode.size=hypernym;
+										   objectMap.put(objectId1, modifiedNode);
+				    				 }			    				 
+				    			}
+						   
 						   }
+						   
+						   //Identify the type of object
 						   if(Arrays.asList(types).contains(word2Name)){					   
 							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.type=word2Name;
 							   objectMap.put(objectId1, modifiedNode);
+						   }else{
+				  				 //Check synonyms to get the object name
+			    				 String synonym =getSynonyms(dict,word2Name,"type");
+			    				 if(!synonym.equals("")){
+									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.colour=synonym;
+									   objectMap.put(objectId1, modifiedNode);
+				    			}else{
+			    					 //Check Hypernyms to get object name
+			    					 String hypernym=getHypernyms(dict,word2Name,"type");
+			    					 if(!hypernym.equals("")){
+										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   modifiedNode=objectMap.get(objectId1);
+										   modifiedNode.type=hypernym;
+										   objectMap.put(objectId1, modifiedNode);
+				    				 }			    				 
+				    			}
+						   
 						   }
 					   }
 				   }
@@ -568,6 +694,7 @@ public class TaggerAndParser {
 			    System.out.println(value.colour);
 			    tree.nodes.add(value);
 			}
+			dict.close();
 			objectIdentifier.defineObject(tree);
 			return output;
 	}
@@ -599,5 +726,218 @@ public class TaggerAndParser {
 		    }
 		}   	
     	return objectPresent;
-    }				
+    }
+    
+	//Method to get synonyms of a word
+	public static String getSynonyms ( IDictionary dict, String name, String wordType){
+		
+		String synonymName="";
+		
+		if(wordType.equals("object")){		
+			// look up first sense of the word 
+			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// iterate over words associated with the synset
+			for( IWord w : synset . getWords ()){
+				//System .out . println (w. getLemma ());
+				if(Arrays.asList(objects).contains(w.getLemma())){
+					System.out.println("Synonym for object present!");
+					synonymName=w.getLemma();
+					break;
+				}
+			}
+			}
+		}
+		
+		//Get synonym of colours
+		if(wordType.equals("colour")){
+			// look up first sense of the word 
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// iterate over words associated with the synset
+			for( IWord w : synset . getWords ()){
+				//System .out . println (w. getLemma ());
+				if(Arrays.asList(colours).contains(w.getLemma())){
+					System.out.println("Synonym for colour present!");
+					synonymName=w.getLemma();
+					break;
+				}
+			}
+			}
+		}
+		
+		//Get synonym of sizes
+		if(wordType.equals("size")){
+			String sizeName="";
+			// look up first sense of the word 
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// iterate over words associated with the synset
+			for( IWord w : synset . getWords ()){
+				//System .out . println (w. getLemma ());
+				if(Arrays.asList(sizes).contains(w.getLemma())){
+					System.out.println("Synonym for size present!");
+					synonymName=w.getLemma();
+					break;
+				}
+			}
+			}
+		}
+		
+		//Get synonyms of types
+		if(wordType.equals("type")){
+			String typeName="";
+			// look up first sense of the word 
+			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// iterate over words associated with the synset
+			for( IWord w : synset . getWords ()){
+				//System .out . println (w. getLemma ());
+				if(Arrays.asList(types).contains(w.getLemma())){
+					System.out.println("Synonym for type present!");
+					synonymName=w.getLemma();
+					break;
+				}
+			}
+			}
+		}
+		
+		return synonymName;
+	}
+	
+	//Method to get hypernyms of a word
+	 public static String getHypernyms ( IDictionary dict, String name, String wordType){
+		 
+		String hypernymName="";
+		
+		//Get hypernym of object
+		if( wordType.equals("object")){
+			// get the synset
+			IIndexWord idxWord = dict . getIndexWord (name, POS. NOUN );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// get the hypernyms
+			List<ISynsetID> hypernyms =synset . getRelatedSynsets ( Pointer . HYPERNYM );
+			
+			// print out each h y p e r n y m s id and synonyms
+			List <IWord> words ;
+				for( ISynsetID sid : hypernyms ){
+				words = dict . getSynset (sid). getWords ();
+					for( Iterator<IWord> i = words . iterator (); i. hasNext () ;){
+						String currentWord = i. next (). getLemma ();
+						if(Arrays.asList(objects).contains(currentWord)){
+							System.out.println("Hypernym of object present!");
+							hypernymName=currentWord;
+							break;
+						}
+					 }
+				}
+			}
+		}
+		
+		//Get hypernym of colour
+		if( wordType.equals("colour")){
+			// get the synset
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// get the hypernyms
+			List<ISynsetID> hypernyms =synset . getRelatedSynsets ( Pointer . HYPERNYM );
+			
+			// print out each h y p e r n y m s id and synonyms
+			List <IWord> words ;
+				for( ISynsetID sid : hypernyms ){
+				words = dict . getSynset (sid). getWords ();
+					for( Iterator<IWord> i = words . iterator (); i. hasNext () ;){
+						String currentWord = i. next (). getLemma ();
+						if(Arrays.asList(colours).contains(currentWord)){
+							System.out.println("Hypernym of colour present!");
+							hypernymName=currentWord;
+							break;
+						}
+					 }
+				}
+			}
+		}
+		
+		//Get hypernym of size
+		if( wordType.equals("size")){
+			// get the synset
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// get the hypernyms
+			List<ISynsetID> hypernyms =synset . getRelatedSynsets ( Pointer . HYPERNYM );
+			
+			// print out each h y p e r n y m s id and synonyms
+			List <IWord> words ;
+				for( ISynsetID sid : hypernyms ){
+				words = dict . getSynset (sid). getWords ();
+					for( Iterator<IWord> i = words . iterator (); i. hasNext () ;){
+						String currentWord = i. next (). getLemma ();
+						if(Arrays.asList(sizes).contains(currentWord)){
+							System.out.println("Hypernym of size present!");
+							hypernymName=currentWord;
+							break;
+						}
+					 }
+				}
+			}
+		}
+		
+		//Get hypernym of type
+		if( wordType.equals("type")){
+			// get the synset
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if(idxWord . getWordIDs ().size()>0){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// get the hypernyms
+			List<ISynsetID> hypernyms =synset . getRelatedSynsets ( Pointer . HYPERNYM );
+			
+			// print out each h y p e r n y m s id and synonyms
+			List <IWord> words ;
+				for( ISynsetID sid : hypernyms ){
+				words = dict . getSynset (sid). getWords ();
+					for( Iterator<IWord> i = words . iterator (); i. hasNext () ;){
+						String currentWord = i. next (). getLemma ();
+						if(Arrays.asList(types).contains(currentWord)){
+							System.out.println("Hypernym of type present!");
+							hypernymName=currentWord;
+							break;
+						}
+					 }
+				}
+			}
+		}
+	return hypernymName;
+	}
 }
+
