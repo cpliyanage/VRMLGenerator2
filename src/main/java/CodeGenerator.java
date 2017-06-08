@@ -21,7 +21,7 @@ public class CodeGenerator {
 		//PrintWriter writer = new PrintWriter("new5.wrl", "UTF-8");
 		//writer.println("#VRML V2.0 utf8");
 		
-		
+		ObjectIdentifier.writer.println("#Box");
 		ObjectIdentifier.writer.println("Transform {"+
 		    "translation "+ cordinates+ //0.0 0.615 0.0
 		    " children ["+
@@ -52,6 +52,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape,size);
 		}
 		
+		ObjectIdentifier.writer.println("#Sphere");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
 		    " children ["+
@@ -82,6 +83,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape,size);
 		}
 		
+		ObjectIdentifier.writer.println("#Cylinder");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
 		    " children ["+
@@ -112,6 +114,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape,size);
 		}
 		
+		ObjectIdentifier.writer.println("#Cone");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
 		    " children ["+
@@ -151,7 +154,8 @@ public class CodeGenerator {
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates,parentShape);
 		}
-
+		
+		ObjectIdentifier.writer.println("#Round Table");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
 			 " children [ "+
@@ -215,6 +219,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates,parentShape);
 		}
 		
+		ObjectIdentifier.writer.println("#Square Table");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
 			" children [ "+
@@ -291,7 +296,8 @@ public class CodeGenerator {
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates,parentShape);
 		}
-
+		
+		ObjectIdentifier.writer.println("#Chair");
 		ObjectIdentifier.writer.println("Transform { "+
 				"translation "+cordinates+
 				" rotation 0 1.5 0 1.5"+
@@ -381,6 +387,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates,parentShape);
 		}
 		
+		ObjectIdentifier.writer.println("#Sofa");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
 		    " children [ "+
@@ -407,6 +414,7 @@ public class CodeGenerator {
 	
 	//Object Ceiling Lamp
 	public void drawCeilingLamp() throws IOException{
+		ObjectIdentifier.writer.println("#Ceiling Lamp");
 		ObjectIdentifier.writer.println("Inline { "+
 			   "url      \"ceilingLamp.wrl\" "+
 			   "bboxSize 0.5 2.5 0.5 "+
@@ -428,6 +436,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"tableLamp",cordinates, parentShape);
 		}
 		
+		ObjectIdentifier.writer.println("#Table Lamp");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
 			" children [ "+
@@ -538,6 +547,7 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates,parentShape);
 		}
 		
+		ObjectIdentifier.writer.println("#Bed");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
 			" rotation 0 3 0 3"+

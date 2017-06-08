@@ -9,7 +9,7 @@ public class VRMLNode{
 	String size;
 	String type;
 	String cordinates;
-	String count;
+	long count=1;
 	
     List<VRMLNode> children = new ArrayList<VRMLNode>();
     VRMLNode parent = null;

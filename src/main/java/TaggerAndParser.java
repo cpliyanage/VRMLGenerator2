@@ -19,15 +19,22 @@ import edu.mit.jwi.item.IWord;
 import edu.mit.jwi.item.IWordID;
 import edu.mit.jwi.item.POS;
 import edu.mit.jwi.item.Pointer;
+import edu.mit.jwi.morph.WordnetStemmer;
 import edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.coref.data.CorefChain;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
+import edu.stanford.nlp.ie.NumberNormalizer;
 
 public class TaggerAndParser {
 		
@@ -41,9 +48,12 @@ public class TaggerAndParser {
 	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
 	static String[] sizes = {"small","regular","large"};
 	static String[] types= {"round","square", "ceiling"};
-
+	static String[] numbers= {"one","two", "three"};
 	
 	public String tagContent(String input) throws IOException{
+		
+		//convert the input to lower case
+		input =input.toLowerCase();
 		
 		// construct the URL to the Wordnet dictionary directory
 		String wnhome = System.getenv("WNHOME");
@@ -54,6 +64,10 @@ public class TaggerAndParser {
 		IDictionary dict = new Dictionary ( url);
 		dict.open();
 		
+		//create stemmer object
+		WordnetStemmer stemmer = new WordnetStemmer(dict);
+		
+		//Create objects and initialize variables
 		objectMentionsMap= new HashMap<String, ArrayList<ObjectMention>>();
 		objectCount=0;
 		ObjectIdentifier objectIdentifier = new ObjectIdentifier();
@@ -61,31 +75,9 @@ public class TaggerAndParser {
 		ArrayList<String> objectNames = new ArrayList<String>();
 		HashMap<String, VRMLNode> objectMap= new HashMap<String, VRMLNode>();
 		ArrayList<String> nounsPresent = new ArrayList<String>();
+		ArrayList<String> adjectivesPresent = new ArrayList<String>();
 		
 		String output="";
-		
-		//POS tagger start
-		MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
-		String tagged = tagger.tagString(input);
-		//POS tagger end
-			
-		String[] taggedWords=tagged.toString().split(" ");
-		String[] current;
-		
-		for(String a:taggedWords){								
-			System.out.println(a);
-			current=a.split("_");
-			if(current[1].equals("NN")){
-				nounsPresent.add(current[0]);
-			}
-			/*if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
-				objectNames.add(current[0]);		
-				currentNode = new VRMLNode(current[0]);
-				objectMap.put(current[0], currentNode);
-			} */
-		}
-		
-		System.out.println(tagged.toString()); 
 		
 		//Stanford CoreNLP start
 		
@@ -98,6 +90,58 @@ public class TaggerAndParser {
 	     // run all Annotators on this text
 	     Annotation document = new Annotation(input);
 	     pipeline.annotate(document);
+	     
+	     // These are all the sentences in this document
+	     
+	     // a CoreMap is essentially a Map that uses class objects as keys and has values with custom types
+	     List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+	     
+	     //POS tagger start
+	     for(CoreMap taggedSentence: sentences) {
+	       for (CoreLabel token: taggedSentence.get(TokensAnnotation.class)) {
+		         // this is the text of the token
+		         String word = token.get(TextAnnotation.class);
+		         // this is the POS tag of the token
+		         String pos = token.get(PartOfSpeechAnnotation.class);
+				if(pos.equals("NN")||pos.equals("NNS")){
+					nounsPresent.add(word);
+				}
+				else if(pos.equals("JJ")){
+					adjectivesPresent.add(word);
+				}
+		       }
+	     }
+		
+/*		//POS tagger start
+		MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
+		String tagged = tagger.tagString(input);
+		//POS tagger end
+			
+		String[] taggedWords=tagged.toString().split(" ");
+		String[] current;
+		
+		for(String a:taggedWords){								
+			System.out.println(a);
+			current=a.split("_");
+			if(current[1].equals("NN")||current[1].equals("NNS")){
+				nounsPresent.add(current[0]);
+			}
+			if(current[1].equals("JJ")){
+				adjectivesPresent.add(current[0]);
+			}
+			//if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
+			//objectNames.add(current[0]);		
+			//currentNode = new VRMLNode(current[0]);
+			//objectMap.put(current[0], currentNode);
+			//} 
+		}
+		
+		System.out.println(tagged.toString()); */
+		
+	     //Create a node for the room
+	     VRMLNode roomNode=new VRMLNode("object0");
+	     roomNode.name="room";
+	     objectMap.put("object0", roomNode);
 	     
     	 //Coreference resolution start
 	     Map<Integer, CorefChain> graph = document.get(CorefChainAnnotation.class);
@@ -118,7 +162,7 @@ public class TaggerAndParser {
 	    	 
 	    	 corefResult=corefResult.substring(corefResult.indexOf("[")+1, corefResult.length()-1);
 	    	 
-	    	 //String[] mentions is an array to store the mentions of a single object
+	    	 //Array to store the mentions of a single object
 	    	 String[] mentions=corefResult.split(",");
 	    	 //For each mention in a single coreference chain/object
 	    	 for(String mention:mentions){
@@ -129,59 +173,63 @@ public class TaggerAndParser {
 	    		 cSplit[0]=cSplit[0].substring(1, cSplit[0].length()-1);
 	    		 String[] words=cSplit[0].split(" ");
 	    		 //For each word of a mention
-	    		 for(String word:words){
-	    			 if(Arrays.asList(objects).contains(word)){
-	    				 boolean objectPresent=checkObjectPresent(word,sentenceNumber);
-	    				 if(!objectPresent){
-	    				 //Adding the mention of the object to the mentions list
-	    		    	 ObjectMention currentMention= new ObjectMention();
-	    		    	 currentMention.name=word;
-	    		    	 currentMention.sentence=sentenceNumber;
-	    		    	 mentionsList.add(currentMention);
-	    		    	 break;
-	    				 }
-	    			 }
-	    			 else{
-	    				 //Check synonyms to get the object name
-	    				 if(nounsPresent.contains(word)){
-		    				 String synonym =getSynonyms(dict,word,"object");
-		    				 if(!synonym.equals("")){
-			    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
-			    				 if(!objectPresent){
-			    				 //Adding the mention of the object to the mentions list
-			    		    	 ObjectMention currentMention= new ObjectMention();
-			    		    	 currentMention.name=synonym;
-			    		    	 currentMention.sentence=sentenceNumber;
-			    		    	 mentionsList.add(currentMention);
-			    		    	 break;
-			    				 }
+		    	for(String word:words){
+		    		if(nounsPresent.contains(word)){	 
+						 String stemWord=word;
+						 
+						 //Obtaining stem of the word						 
+						 List<String> stems = stemmer.findStems(word, POS.NOUN);
+						 if(stems.size()>0){
+							 stemWord= stems.get(0);
+						 }
+						 
+		    			 if(Arrays.asList(objects).contains(stemWord)){
+		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber);
+		    				 if(!objectPresent){
+		    				 //Adding the mention of the object to the mentions list
+		    		    	 ObjectMention currentMention= new ObjectMention();
+		    		    	 currentMention.name=stemWord;
+		    		    	 currentMention.sentence=sentenceNumber;
+		    		    	 mentionsList.add(currentMention);
+		    		    	 break;
 		    				 }
-	    				 }else{
-	    					 //Check Hypernyms to get object name
-		    					 if(nounsPresent.contains(word)){
-		    					 String hypernym=getHypernyms(dict,word,"object");
-		    					 if(!hypernym.equals("")){
-				    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+		    			 }
+		    			 else{
+		    				 //Check synonyms to get the object name
+			    				 String synonym =getSynonyms(dict,stemWord,"object");
+			    				 if(!synonym.equals("")){
+				    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
 				    				 if(!objectPresent){
 				    				 //Adding the mention of the object to the mentions list
 				    		    	 ObjectMention currentMention= new ObjectMention();
-				    		    	 currentMention.name=hypernym;
+				    		    	 currentMention.name=synonym;
 				    		    	 currentMention.sentence=sentenceNumber;
 				    		    	 mentionsList.add(currentMention);
 				    		    	 break;
 				    				 }
-		    					 }
-			    			}
-	    				 }
-	    			 }
-	    		 }
+			    				 }
+		    				 else{
+		    					 //Check Hypernyms to get object name
+				    					 String hypernym=getHypernyms(dict,stemWord,"object");
+				    					 if(!hypernym.equals("")){
+						    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+						    				 if(!objectPresent){
+						    				 //Adding the mention of the object to the mentions list
+						    		    	 ObjectMention currentMention= new ObjectMention();
+						    		    	 currentMention.name=hypernym;
+						    		    	 currentMention.sentence=sentenceNumber;
+						    		    	 mentionsList.add(currentMention);
+						    		    	 break;
+						    				 }
+			    					 }			    			
+		    				 }
+		    			 }
+		    	}	 }
 	    	 }
 	    	 
 	    	 //End making mention list
 	    	 	    	 
-	    	 //Create a VRML node for the object
-	    	 //Add to object ID-Mention Map
-	    	//Add to object ID-VRML Node Map
+	    	//Create a VRML node for the object, Add to object ID-Mention Map, Add to object ID-VRML Node Map
 	    	 if(mentionsList.size()>0){
 	    		 
 	    		 objectCount++;
@@ -199,20 +247,15 @@ public class TaggerAndParser {
 	    	}
 	     
 	     System.out.println("Number of objects: " +objectCount);
-	     output = "Number of objects: "+ objectCount;
+	     output = "Number of objects: "+ objectCount;	 
 	     
 	     //Coreference Resolution end
 	     	     
-	     // These are all the sentences in this document
-	     
-	     // a CoreMap is essentially a Map that uses class objects as keys and has values with custom types
-	     List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+    	 //Dependency parser start
 	     int sentenceNumber=0;
 	     for(CoreMap sentence: sentences) {
 	    	 
 	    	 sentenceNumber++;
-	    	 
-	    	 //Dependency parser start
 	    	 
 		     //Enhanced dependencies of the sentence    	 
 		       System.out.println("Enhanced dependencies of the sentence");
@@ -236,10 +279,23 @@ public class TaggerAndParser {
 				   
 				   String[] word1 = split2[0].split("-");
 				   String word1Name=word1[0];
+				   
+					 //Obtaining stem of the word					 
+					 List<String> stems = stemmer.findStems(word1Name, null);
+					 if(stems.size()>0){
+						 word1Name= stems.get(0);
+					 }
+				   
 				   String word1Index=word1[1];
 				   
 				   String[] word2 = split2[1].split("-");
 				   String word2Name=word2[0];
+				   
+					 List<String> stems2 = stemmer.findStems(word2Name, null);
+					 if(stems2.size()>0){
+						 word2Name= stems2.get(0);
+					 }
+				   
 				   String word2Index=word2[1].substring(0,word2[1].length()-1);
 				   				   
 				   //start identifying attributes
@@ -275,6 +331,15 @@ public class TaggerAndParser {
 										   objectMap.put(objectId1, modifiedNode);
 				    				 }			    				 
 				    			}
+						   }
+						   
+						   //Identifying the colour of the object
+						   if(Arrays.asList(numbers).contains(word2Name)){
+							   //modifiedNode=objectMap.get(word1Name);
+							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   modifiedNode=objectMap.get(objectId1);
+							   modifiedNode.colour=word2Name;
+							   objectMap.put(objectId1, modifiedNode);							   
 						   }
 						   
 						   //Identifying the size of the object
@@ -334,6 +399,21 @@ public class TaggerAndParser {
 					   }
 				   }
 				   //end identifying attributes
+				   
+				   //Start obtaining count		   				  
+				   else if(dependencyType.equals("nummod")){
+							   //modifiedNode=objectMap.get(word1Name);
+					   		   long objNumber=1;
+					   		   if(!(NumberNormalizer.wordToNumber(word2Name)==null)){
+					   			   Number num= NumberNormalizer.wordToNumber(word2Name);
+					   			   objNumber= num.longValue();
+					   		   }
+							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   modifiedNode=objectMap.get(objectId1);
+							   modifiedNode.count=objNumber;
+							   objectMap.put(objectId1, modifiedNode);
+						   }
+				   //End obtaining count
 				   
 				   //start identifying locations
 				   
@@ -411,10 +491,22 @@ public class TaggerAndParser {
 							   
 							   String[] innerWord1 = innerSplit2[0].split("-");
 							   String innerWord1Name=innerWord1[0];
+							   
+								 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+								 if(stems3.size()>0){
+									 innerWord1Name= stems3.get(0);
+								 }
+							   
 							   String innerWord1Index=innerWord1[1];
 							   
 							   String[] innerWord2 = split2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
+							   
+								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+								 if(stems4.size()>0){
+									 innerWord2Name= stems4.get(0);
+								 }
+							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
 							   if(innerWord1Name.equals("front")&&objectNames.contains(innerWord2Name)){
@@ -498,10 +590,22 @@ public class TaggerAndParser {
 							   
 							   String[] innerWord1 = innerSplit2[0].split("-");
 							   String innerWord1Name=innerWord1[0];
+							   
+								 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+								 if(stems3.size()>0){
+									 innerWord1Name= stems3.get(0);
+								 }
+							   
 							   String innerWord1Index=innerWord1[1];
 							   
 							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
+							   
+								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+								 if(stems4.size()>0){
+									 innerWord2Name= stems4.get(0);
+								 }
+							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
 							   if(innerWord1Name.equals("left")&&objectNames.contains(innerWord2Name)){
@@ -536,10 +640,22 @@ public class TaggerAndParser {
 							   
 							   String[] innerWord1 = innerSplit2[0].split("-");
 							   String innerWord1Name=innerWord1[0];
+							   
+								 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+								 if(stems3.size()>0){
+									 innerWord1Name= stems3.get(0);
+								 }
+								 
 							   String innerWord1Index=innerWord1[1];
 							   
 							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
+							   
+								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+								 if(stems4.size()>0){
+									 innerWord2Name= stems4.get(0);
+								 }
+							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
 							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("left")){
@@ -596,10 +712,22 @@ public class TaggerAndParser {
 							   
 							   String[] innerWord1 = innerSplit2[0].split("-");
 							   String innerWord1Name=innerWord1[0];
+							   
+								 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+								 if(stems3.size()>0){
+									 innerWord1Name= stems3.get(0);
+								 }
+							   
 							   String innerWord1Index=innerWord1[1];
 							   
 							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
+							   
+								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+								 if(stems4.size()>0){
+									 innerWord2Name= stems4.get(0);
+								 }
+							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
 							   if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
@@ -634,10 +762,22 @@ public class TaggerAndParser {
 							   
 							   String[] innerWord1 = innerSplit2[0].split("-");
 							   String innerWord1Name=innerWord1[0];
+							   
+								 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+								 if(stems3.size()>0){
+									 innerWord1Name= stems3.get(0);
+								 }
+							   
 							   String innerWord1Index=innerWord1[1];
 							   
 							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
+							   
+								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+								 if(stems4.size()>0){
+									 innerWord2Name= stems4.get(0);
+								 }
+							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
 							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("right")){
@@ -692,12 +832,21 @@ public class TaggerAndParser {
 			for (Entry<String, VRMLNode> obj : objectMap.entrySet()) {
 			    String key = obj.getKey();
 			    VRMLNode value = obj.getValue();
-			    System.out.println("Printing Map");
+			    
+			    if((value.parent==null)&&!(value.name.equals("room"))){
+			    	value.parent=roomNode;
+			    	roomNode.addChild(value);
+			    } 			    
+			    tree.nodes.add(value);
+			    
+			    System.out.println("Printing VRML node details");
 			    System.out.println(value.id);
 			    System.out.println(value.name);
 			    System.out.println(value.colour);
-			    tree.nodes.add(value);
+			    System.out.println(value.count);
+			    
 			}
+			
 			dict.close();
 			objectIdentifier.defineObject(tree);
 			return output;
@@ -802,7 +951,6 @@ public class TaggerAndParser {
 		
 		//Get synonyms of types
 		else if(wordType.equals("type")){
-			String typeName="";
 			// look up first sense of the word 
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE);
 			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
