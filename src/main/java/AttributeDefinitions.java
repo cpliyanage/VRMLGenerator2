@@ -5,6 +5,7 @@ public class AttributeDefinitions {
 
 	Hashtable<String, String> colourTable = new Hashtable<String, String>();
 	Hashtable<String, String> sizeTable = new Hashtable<String, String>();
+	Hashtable<String, String> orientationTable = new Hashtable<String, String>();
 	
 	 // Create a hash map for colours   
 		public void initializeColours() {
@@ -15,6 +16,29 @@ public class AttributeDefinitions {
 	      colourTable.put("black", "0.0 0.0 0.0");
 	      colourTable.put("white", "1.0 1.0 1.0");
 	   }
+		
+	 // Create a hash map for orientations   
+		public void initializeOrientations(String shape) {
+			if (shape.equalsIgnoreCase("chair")){
+			orientationTable.put("front", "0 1 0 1.5708");
+			orientationTable.put("backward", "0 1 0 4.7124");
+			orientationTable.put("left", "0 1 0 3.1416");
+			orientationTable.put("right", "0 0 0 0");
+		   }
+			else if (shape.equalsIgnoreCase("bed")){
+			orientationTable.put("front", "0 1 0 3.1416");
+			orientationTable.put("backward", "0 0 0 0");
+			orientationTable.put("left", "0 1 0 1.5708");
+			orientationTable.put("right", "0 1 0 4.7124");
+		   }
+			//if ((shape.equalsIgnoreCase("box"))||(shape.equalsIgnoreCase("sphere"))||(shape.equalsIgnoreCase("cone"))||(shape.equalsIgnoreCase("cylinder"))||(shape.equalsIgnoreCase("table"))||(shape.equalsIgnoreCase("sofa"))){
+			else{
+			orientationTable.put("front", "0 0 0 0");// Objects are facing front by default. No rotation needed
+			orientationTable.put("backward", "0 1 0 3.1416");
+			orientationTable.put("left", "0 1 0 4.7124");
+			orientationTable.put("right", "0 1 0 1.5708");
+		   }
+		}
 	   
 	   //Initialize hash map for sizes
 	   public void initializeSizes(String shape) {

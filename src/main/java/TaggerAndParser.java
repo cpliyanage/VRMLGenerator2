@@ -49,7 +49,7 @@ public class TaggerAndParser {
 	static String[] sizes = {"small","regular","medium", "large"};
 	static String[] types= {"round","square", "ceiling"};
 	String[] roomTextures= {"wooden","brick"};
-	String[] orientations= {"front","back", "left", "right"};
+	String[] orientations= {"front","backward", "left", "right"};
 	
 	public String tagContent(String input) throws IOException{
 		

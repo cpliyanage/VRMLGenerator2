@@ -5,13 +5,17 @@ public class CodeGenerator {
 	//ObjectIdentifier objectIdentifier= new ObjectIdentifier();
 	
 	//Basic shapes
-	public String drawBox(String colour, String size, String parentCordinates, String relativeLocation, String parentShape) throws IOException{
+	public String drawBox(String colour, String size, String parentCordinates, String relativeLocation, String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("box");
 		attributes.initializeSizes("box");
 		
 		String cordinates;
+		//Assign the rotation for the orientation specified
+		String rotation=attributes.orientationTable.get(orientation);
 		
+		//If parent cordinates and relative location are defined
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box",parentShape,size);
 		}else{
@@ -22,9 +26,10 @@ public class CodeGenerator {
 		//writer.println("#VRML V2.0 utf8");
 		
 		ObjectIdentifier.writer.println("#Box");
-		ObjectIdentifier.writer.println("Transform {"+
-		    "translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		ObjectIdentifier.writer.println("Transform { "+
+		    "translation "+cordinates+ //0.0 0.615 0.0
+		    " rotation "+rotation+
+		    " children [ "+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -42,20 +47,27 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSphere(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawSphere(String colour, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("sphere");
 		attributes.initializeSizes("sphere");
 
-		String cordinates="0.0 0.615 0.0";
+		String cordinates;
+		//Assign the rotation for the orientation specified
+		String rotation=attributes.orientationTable.get(orientation);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape,size);
+		}else{
+			cordinates="0.0 0.615 0.0";
 		}
 		
 		ObjectIdentifier.writer.println("#Sphere");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    " rotation "+rotation+
+			" children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -73,12 +85,16 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCylinder(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawCylinder(String colour, String size,String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("cylinder");
 		attributes.initializeSizes("cylinder");
 
 		String cordinates="0.0 0.615 0.0";
+		//Assign the rotation for the orientation specified
+		String rotation=attributes.orientationTable.get(orientation);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape,size);
 		}
@@ -86,7 +102,8 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Cylinder");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    " rotation "+rotation+
+			" children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -104,11 +121,13 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCone(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawCone(String colour, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("cone");
 		attributes.initializeSizes("cone");
-
+		
+		String rotation=attributes.orientationTable.get(orientation);
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape,size);
@@ -117,7 +136,8 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Cone");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
-		    " children ["+
+		    " rotation "+rotation+
+			" children ["+
 			"Shape {"+
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
@@ -143,12 +163,13 @@ public class CodeGenerator {
 	//Relative location defines the position, left, right etc.
 	
 	//Object Round Table
-	public String drawRoundTable(String colour, String size, String parentCordinates,String relativeLocation,String parentShape) throws IOException{
+	public String drawRoundTable(String colour, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-	
-		String cordinates= "0.0 0.0 0.0";
-		String topCordinates = "0.0 0.615 0.0";
+		attributes.initializeOrientations("table");
+		
+		String rotation=attributes.orientationTable.get(orientation);
+		String cordinates= "0.0 -3.50 0.0";//"0.0 0.0 0.0"
 		//String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
@@ -158,7 +179,8 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Round Table");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
-			 " children [ "+
+			" rotation "+rotation+
+			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0 "+
 		    " children ["+
@@ -208,10 +230,12 @@ public class CodeGenerator {
 	}
 	
 	//Object Square Table
-	public String drawSquareTable(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawSquareTable(String colour, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("table");
 
+		String rotation=attributes.orientationTable.get(orientation);
 		String cordinates="0.0 0.0 0.0";
 		//String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
 		
@@ -222,6 +246,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Square Table");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
+			" rotation "+rotation+
 			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
@@ -285,12 +310,13 @@ public class CodeGenerator {
 	}
 	
 	//Object Chair
-	public String drawChair(String colour, String size, String parentCordinates,String relativeLocation,String parentShape) throws IOException{
+	public String drawChair(String colour, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
-		
+		attributes.initializeOrientations("chair");
+
+		String rotation=attributes.orientationTable.get(orientation);
 		String cordinates= "0.0 0.0 0.0";
-		String topCordinates = "0.0 0.5 0.0";
 		//String[] cordinates={"0.0 0.5 0.0","0.1575 0.2485 0.1575","-0.1575 0.2485 0.1575","-0.1575 0.2485 -0.1575","0.1575 0.2485 -0.1575","0.1875 0.5 0.0","0.0 0.54 0.0","0.0 0.2275 0.0","0.0 0.2275 -0.083","0.0 0.2275 0.083","0.0 0.2275 -0.166","0.0 0.2275 0.166"};
 
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
@@ -300,7 +326,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Chair");
 		ObjectIdentifier.writer.println("Transform { "+
 				"translation "+cordinates+
-				" rotation 0 1.5 0 1.5"+
+				" rotation "+rotation+//0 1 0 1.57
 				" children [ "+
 					"Transform {"+ //chair seat
 				    "translation 0.0 0.5 0.0"+
@@ -377,10 +403,12 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSofa(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawSofa(String colour, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("sofa");
 
+		String rotation=attributes.orientationTable.get(orientation);
 		String cordinates="0.0 0.0 0.0";
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
@@ -390,7 +418,8 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Sofa");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
-		    " children [ "+
+		    " rotation "+rotation+
+			" children [ "+
 		        "Shape { "+ //sofa seat
 		            "appearance DEF "+colour+" Appearance { "+
 		                "material Material { "+
@@ -423,7 +452,7 @@ public class CodeGenerator {
 	}
 	
 	//Object Table Lamp
-	public String drawTableLamp(String colour, String size,String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawTableLamp(String colour, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeSizes("tableLamp");
@@ -535,9 +564,12 @@ public class CodeGenerator {
 		 return cordinates; //Return the location where the object is drawn
 	}
 	
-	public String drawBed(String colour, String size, String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+	public String drawBed(String colour, String size, String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeOrientations("bed");
+
+		String rotation=attributes.orientationTable.get(orientation);
 		
 		String cordinates="0.0 0.0 0.0";
 		//String[] cordinates={"0.0 0.615 0.0","0.0 0.815 1.0","0.4 0.3075 1.0","-0.4 0.3075 -0.8","0.4 0.3075 -0.8","-0.4 0.3075 1.0"};
@@ -550,7 +582,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Bed");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
-			" rotation 0 3 0 3"+
+			" rotation "+rotation+//0 1 0 3
 			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
