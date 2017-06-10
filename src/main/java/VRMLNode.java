@@ -9,9 +9,10 @@ public class VRMLNode{
 	String size;
 	String type;
 	String cordinates;
+	String orientation;
 	long count=1;
 	
-    List<VRMLNode> children = new ArrayList<VRMLNode>();
+	ArrayList<VRMLNode> children = new ArrayList<VRMLNode>();
     VRMLNode parent = null;
     
     public VRMLNode(String id) {
@@ -23,6 +24,14 @@ public class VRMLNode{
         this.children.add(child);
     }
 
+    public void removeChild(String objId) {
+    	for(int i=0;i<children.size();i++){
+    		if(children.get(i).id.equals(objId)){
+    			children.remove(i);
+    		}
+    	}
+    	
+    }
 /*    public void addChild(String name) {
         VRMLNode newChild = new VRMLNode(name);
         newChild.setParent(this);

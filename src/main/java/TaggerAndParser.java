@@ -42,13 +42,14 @@ public class TaggerAndParser {
 	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
 	int objectCount;
 	
-	//String locations[]={"left","right","above","below","front","behind","top", "under","on"};
-	String[] roomLocations={"middle"};
+	String locations[]={"left","right","above","below","front","behind","top", "under","on", "next"};
+	String[] roomLocations={"middle", "corner"};
 	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
 	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
-	static String[] sizes = {"small","regular","large"};
+	static String[] sizes = {"small","regular","medium", "large"};
 	static String[] types= {"round","square", "ceiling"};
-	static String[] numbers= {"one","two", "three"};
+	String[] roomTextures= {"wooden","brick"};
+	String[] orientations= {"front","back", "left", "right"};
 	
 	public String tagContent(String input) throws IOException{
 		
@@ -149,7 +150,7 @@ public class TaggerAndParser {
 	     
 	     System.out.println("Corefernce Resolution result: ");
 	     
-	     //For each object/ coreference chain
+	     //For each coreference chain (A single coreference chain is a single object)
 	     for (Map.Entry<Integer, CorefChain> entry : graph.entrySet()) {
 	    	 
 	    	 CorefChain currentCoref =entry.getValue();
@@ -158,76 +159,88 @@ public class TaggerAndParser {
 	    	 
 	    	 ArrayList<ObjectMention> mentionsList= new ArrayList<ObjectMention>();
 	    	 
-	    	 //Code to get the name and sentence number
-	    	 
+	    	 //Code to get the name and sentence number	    	 
 	    	 corefResult=corefResult.substring(corefResult.indexOf("[")+1, corefResult.length()-1);
 	    	 
-	    	 //Array to store the mentions of a single object
+	    	 //Array to store the mentions in a single coreference chain (mentions of a single object)
 	    	 String[] mentions=corefResult.split(",");
-	    	 //For each mention in a single coreference chain/object
-	    	 for(String mention:mentions){
-	    		 String[] cSplit=mention.split(" in sentence ");
-	    		 //sentence number of the mention
-	    		 int sentenceNumber=Integer.parseInt(cSplit[1]);
-	    		 //text part of the mention
-	    		 cSplit[0]=cSplit[0].substring(1, cSplit[0].length()-1);
-	    		 String[] words=cSplit[0].split(" ");
-	    		 //For each word of a mention
-		    	for(String word:words){
-		    		if(nounsPresent.contains(word)){	 
-						 String stemWord=word;
-						 
-						 //Obtaining stem of the word						 
-						 List<String> stems = stemmer.findStems(word, POS.NOUN);
-						 if(stems.size()>0){
-							 stemWord= stems.get(0);
-						 }
-						 
-		    			 if(Arrays.asList(objects).contains(stemWord)){
-		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber);
-		    				 if(!objectPresent){
-		    				 //Adding the mention of the object to the mentions list
-		    		    	 ObjectMention currentMention= new ObjectMention();
-		    		    	 currentMention.name=stemWord;
-		    		    	 currentMention.sentence=sentenceNumber;
-		    		    	 mentionsList.add(currentMention);
-		    		    	 break;
-		    				 }
-		    			 }
-		    			 else{
-		    				 //Check synonyms to get the object name
-			    				 String synonym =getSynonyms(dict,stemWord,"object");
-			    				 if(!synonym.equals("")){
-				    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
-				    				 if(!objectPresent){
-				    				 //Adding the mention of the object to the mentions list
-				    		    	 ObjectMention currentMention= new ObjectMention();
-				    		    	 currentMention.name=synonym;
-				    		    	 currentMention.sentence=sentenceNumber;
-				    		    	 mentionsList.add(currentMention);
-				    		    	 break;
-				    				 }
-			    				 }
-		    				 else{
-		    					 //Check Hypernyms to get object name
-				    					 String hypernym=getHypernyms(dict,stemWord,"object");
-				    					 if(!hypernym.equals("")){
-						    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
-						    				 if(!objectPresent){
-						    				 //Adding the mention of the object to the mentions list
-						    		    	 ObjectMention currentMention= new ObjectMention();
-						    		    	 currentMention.name=hypernym;
-						    		    	 currentMention.sentence=sentenceNumber;
-						    		    	 mentionsList.add(currentMention);
-						    		    	 break;
-						    				 }
-			    					 }			    			
-		    				 }
-		    			 }
-		    	}	 }
+	    	 if(mentions.length>0){
+	    		 String[] fSplit=mentions[0].split(" in sentence ");
+	    		//sentence number of the mention
+	    		 int fSentenceNumber=Integer.parseInt(fSplit[1]);
+	    		 //text part of the first mention
+	    		 fSplit[0]=fSplit[0].substring(1, fSplit[0].length()-1);//removing quotes
+	    		 String[] fMentionWords=fSplit[0].split(" ");// Array of words in the first mention
+	    		 
+	    		 //Eliminating coreference chains with conjunctions
+	    		 if(!(Arrays.asList(fMentionWords).contains("and"))){
+	    	    	 //For each mention in a single coreference chain/object
+	    	    	 for(String mention:mentions){
+	    	    		 String[] cSplit=mention.split(" in sentence ");
+	    	    		 //sentence number of the mention
+	    	    		 int sentenceNumber=Integer.parseInt(cSplit[1]);
+	    	    		 //text part of the mention
+	    	    		 cSplit[0]=cSplit[0].substring(1, cSplit[0].length()-1);//removing quotes
+	    	    		 String[] words=cSplit[0].split(" ");
+	    	    		
+	    	    		 //For each word of a mention
+	    		    	for(String word:words){
+	    		    		if(nounsPresent.contains(word)){	 
+	    						 String stemWord=word;
+	    						 
+	    						 //Obtaining stem of the word						 
+	    						 List<String> stems = stemmer.findStems(word, POS.NOUN);
+	    						 if(stems.size()>0){
+	    							 stemWord= stems.get(0);
+	    						 }
+	    						 
+	    		    			 if(Arrays.asList(objects).contains(stemWord)){
+	    		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber);
+	    		    				 if(!objectPresent){
+	    		    				 //Adding the mention of the object to the mentions list
+	    		    		    	 ObjectMention currentMention= new ObjectMention();
+	    		    		    	 currentMention.name=stemWord;
+	    		    		    	 currentMention.sentence=sentenceNumber;
+	    		    		    	 mentionsList.add(currentMention);
+	    		    		    	 break;
+	    		    				 }
+	    		    			 }
+	    		    			 else{
+	    		    				 //Check synonyms to get the object name
+	    			    				 String synonym =getSynonyms(dict,stemWord,"object");
+	    			    				 if(!(synonym.equals(""))){
+	    				    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
+	    				    				 if(!objectPresent){
+	    				    				 //Adding the mention of the object to the mentions list
+	    				    		    	 ObjectMention currentMention= new ObjectMention();
+	    				    		    	 currentMention.name=synonym;
+	    				    		    	 currentMention.sentence=sentenceNumber;
+	    				    		    	 mentionsList.add(currentMention);
+	    				    		    	 break;
+	    				    				 }
+	    			    				 }
+	    		    				 else{
+	    		    					 //Check Hypernyms to get object name
+	    				    					 String hypernym=getHypernyms(dict,stemWord,"object");
+	    				    					 if(!hypernym.equals("")){
+	    						    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+	    						    				 if(!objectPresent){
+	    						    				 //Adding the mention of the object to the mentions list
+	    						    		    	 ObjectMention currentMention= new ObjectMention();
+	    						    		    	 currentMention.name=hypernym;
+	    						    		    	 currentMention.sentence=sentenceNumber;
+	    						    		    	 mentionsList.add(currentMention);
+	    						    		    	 break;
+	    						    				 }
+	    			    					 }			    			
+	    		    				 }
+	    		    			 }
+	    		    		}	 
+	    		    	}
+	    	    	 }//End making mention list
+	    		 }
+	    		
 	    	 }
-	    	 
-	    	 //End making mention list
 	    	 	    	 
 	    	//Create a VRML node for the object, Add to object ID-Mention Map, Add to object ID-VRML Node Map
 	    	 if(mentionsList.size()>0){
@@ -235,13 +248,115 @@ public class TaggerAndParser {
 	    		 objectCount++;
 		    	 String currentId="object"+objectCount;
 		    	 
-	    		//Adding the mentions of an object to the object mentions map
+		    	//Adding the mentions of an object to the object mentions map
 		    	 objectMentionsMap.put(currentId, mentionsList);
 		    	 objectNames.add(mentionsList.get(0).name);
 	      	 
 		    	 //Add the object to the Object Map
 		    	 VRMLNode currentNode=new VRMLNode(currentId);
 		    	 currentNode.name=mentionsList.get(0).name;
+		    	 
+		    	 //Checking for attributes		    	 
+	    		 String[] mentionSplit=mentions[0].split(" in sentence ");
+	    		 //text part of the mention
+	    		 mentionSplit[0]=mentionSplit[0].substring(1, mentionSplit[0].length()-1);
+	    		 String[] firstMentionWords=mentionSplit[0].split(" ");
+		    	 
+	    		 for(int x=0;x<firstMentionWords.length;x++){
+	    			 if(adjectivesPresent.contains(firstMentionWords[x])){
+	    				 //colour
+		    			 if((Arrays.asList(colours).contains(firstMentionWords[x]))){
+		    				 currentNode.colour=firstMentionWords[x];
+		    			 }else{
+			  				 //Check synonyms
+		    				 String wsynonym =getSynonyms(dict,firstMentionWords[x],"colour");
+		    				 if(!wsynonym.equals("")){
+		    					 currentNode.colour=wsynonym;
+			    			}else{
+		    					 //Check Hypernyms 
+		    					 String whypernym=getHypernyms(dict,firstMentionWords[x],"colour");
+		    					 if(!whypernym.equals("")){
+		    						 currentNode.colour=whypernym;
+			    				 }			    				 
+			    			}					   
+		    			 }
+
+		    			 //size
+		    			 if(Arrays.asList(sizes).contains(firstMentionWords[x])){
+		    				 currentNode.size=firstMentionWords[x];
+		    			 }else{
+			  				 //Check synonyms
+		    				 String wsynonym =getSynonyms(dict,firstMentionWords[x],"size");
+		    				 if(!wsynonym.equals("")){
+		    					 currentNode.size=wsynonym;
+			    			}else{
+		    					 //Check Hypernyms 
+		    					 String whypernym=getHypernyms(dict,firstMentionWords[x],"size");
+		    					 if(!whypernym.equals("")){
+		    						 currentNode.size=whypernym;
+			    				 }			    				 
+			    			}					   
+		    			 
+		    			 }
+
+		    			 //type
+		    			 if(Arrays.asList(types).contains(firstMentionWords[x])){
+		    				 currentNode.type=firstMentionWords[x];
+		    			 }else{
+			  				 //Check synonyms
+		    				 String wsynonym =getSynonyms(dict,firstMentionWords[x],"type");
+		    				 if(!wsynonym.equals("")){
+		    					 currentNode.type=wsynonym;
+			    			}else{
+		    					 //Check Hypernyms 
+		    					 String whypernym=getHypernyms(dict,firstMentionWords[x],"type");
+		    					 if(!whypernym.equals("")){
+		    						 currentNode.type=whypernym;
+			    				 }			    				 
+			    			}					   
+		    			 
+		    			 }
+	    		 	}
+	    			 
+	    			 //location relative to the room
+	    			 if(Arrays.asList(roomLocations).contains(firstMentionWords[x])){
+	    				 if(firstMentionWords[x].equals("corner")&&Arrays.asList(firstMentionWords).contains("left")){
+		    				 currentNode.location="leftCorner";
+		    				 currentNode.parent=roomNode;
+	    				 }
+	    				 else if(firstMentionWords[x].equals("corner")&&Arrays.asList(firstMentionWords).contains("right")){
+		    				 currentNode.location="rightCorner";
+		    				 currentNode.parent=roomNode;
+	    				 }else{
+		    				 currentNode.location=firstMentionWords[x];
+		    				 currentNode.parent=roomNode;
+		    				 roomNode.addChild(currentNode);
+	    				 }
+	    			 }
+	    			 
+	    			 //location relative to another object
+	    			 if(Arrays.asList(locations).contains(firstMentionWords[x])){
+	    				 
+	    				 if(firstMentionWords[x].equals("next")){
+	    					 currentNode.location="right";
+	    				 }
+	    				 currentNode.location=firstMentionWords[x];
+	    				 
+	    				 //logic to find parent name
+	    				 for(int y=x+1;y<firstMentionWords.length;y++){
+	    					 if(Arrays.asList(objects).contains(firstMentionWords[y])){
+	    	    				 String currentParentId=getObjectIdByName(firstMentionWords[y]);
+	    	    				 if(!currentParentId.equals("")){
+	    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
+	    		    				 currentNode.parent=currentParent; 
+	    		    				 currentParent.addChild(currentNode);
+	    	    				 }
+	    					 }
+	    				 }	    				 
+	    			 }
+	    		 }
+		    	 
+	    		 //Adding object to the object map
 		    	 objectMap.put(currentId, currentNode);	    	 
 	    	 }
 	    	}
@@ -304,12 +419,40 @@ public class TaggerAndParser {
 				   
 				   //Identifying colour
 				   if(dependencyType.equals("amod")||dependencyType.equals("compound")||dependencyType.equals("acl:relcl")){
+					   
+					   //identifying room colour 
+					   if((word1Name.equals("room"))||(word1Name.equals("wall"))||(word1Name.equals("walls"))){
+						   //Identifying the colour of the object
+						   if((Arrays.asList(colours).contains(word2Name))||(Arrays.asList(roomTextures).contains(word2Name))){
+							   modifiedNode=objectMap.get("object0");
+							   modifiedNode.colour=word2Name;
+							   objectMap.put("object0", modifiedNode);							   
+						   }else{
+				  				 //Check synonyms
+			    				 String synonym =getSynonyms(dict,word2Name,"colour");
+			    				 if(!synonym.equals("")){
+									   modifiedNode=objectMap.get("object0");
+									   modifiedNode.colour=synonym;
+									   objectMap.put("object0", modifiedNode);
+				    			}else{
+			    					 //Check Hypernyms 
+			    					 String hypernym=getHypernyms(dict,word2Name,"colour");
+			    					 if(!hypernym.equals("")){
+										   modifiedNode=objectMap.get("object0");
+										   modifiedNode.colour=hypernym;
+										   objectMap.put("object0", modifiedNode);
+				    				 }			    				 
+				    			}
+						   }
+					   }
+					   
+					   
 					   if(objectNames.contains(word1Name)){
 						   
 						   //Identifying the colour of the object
 						   if(Arrays.asList(colours).contains(word2Name)){
 							   //modifiedNode=objectMap.get(word1Name);
-							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.colour=word2Name;
 							   objectMap.put(objectId1, modifiedNode);							   
@@ -317,7 +460,7 @@ public class TaggerAndParser {
 				  				 //Check synonyms
 			    				 String synonym =getSynonyms(dict,word2Name,"colour");
 			    				 if(!synonym.equals("")){
-									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 									   modifiedNode=objectMap.get(objectId1);
 									   modifiedNode.colour=synonym;
 									   objectMap.put(objectId1, modifiedNode);
@@ -325,7 +468,7 @@ public class TaggerAndParser {
 			    					 //Check Hypernyms 
 			    					 String hypernym=getHypernyms(dict,word2Name,"colour");
 			    					 if(!hypernym.equals("")){
-										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 										   modifiedNode=objectMap.get(objectId1);
 										   modifiedNode.colour=hypernym;
 										   objectMap.put(objectId1, modifiedNode);
@@ -333,27 +476,17 @@ public class TaggerAndParser {
 				    			}
 						   }
 						   
-						   //Identifying the colour of the object
-						   if(Arrays.asList(numbers).contains(word2Name)){
-							   //modifiedNode=objectMap.get(word1Name);
-							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
-							   modifiedNode=objectMap.get(objectId1);
-							   modifiedNode.colour=word2Name;
-							   objectMap.put(objectId1, modifiedNode);							   
-						   }
-						   
 						   //Identifying the size of the object
 						   if(Arrays.asList(sizes).contains(word2Name)){							   
-							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.size=word2Name;
 							   objectMap.put(objectId1, modifiedNode);
 						   }else{
-
 				  				 //Check synonyms 
 			    				 String synonym =getSynonyms(dict,word2Name,"size");
 			    				 if(!synonym.equals("")){
-									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 									   modifiedNode=objectMap.get(objectId1);
 									   modifiedNode.size=synonym;
 									   objectMap.put(objectId1, modifiedNode);
@@ -361,7 +494,7 @@ public class TaggerAndParser {
 			    					 //Check Hypernyms
 			    					 String hypernym=getHypernyms(dict,word2Name,"size");
 			    					 if(!hypernym.equals("")){
-										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 										   modifiedNode=objectMap.get(objectId1);
 										   modifiedNode.size=hypernym;
 										   objectMap.put(objectId1, modifiedNode);
@@ -372,7 +505,7 @@ public class TaggerAndParser {
 						   
 						   //Identify the type of object
 						   if(Arrays.asList(types).contains(word2Name)){					   
-							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.type=word2Name;
 							   objectMap.put(objectId1, modifiedNode);
@@ -380,7 +513,7 @@ public class TaggerAndParser {
 				  				 //Check synonyms to get the object name
 			    				 String synonym =getSynonyms(dict,word2Name,"type");
 			    				 if(!synonym.equals("")){
-									   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 									   modifiedNode=objectMap.get(objectId1);
 									   modifiedNode.colour=synonym;
 									   objectMap.put(objectId1, modifiedNode);
@@ -388,7 +521,7 @@ public class TaggerAndParser {
 			    					 //Check Hypernyms to get object name
 			    					 String hypernym=getHypernyms(dict,word2Name,"type");
 			    					 if(!hypernym.equals("")){
-										   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 										   modifiedNode=objectMap.get(objectId1);
 										   modifiedNode.type=hypernym;
 										   objectMap.put(objectId1, modifiedNode);
@@ -408,7 +541,7 @@ public class TaggerAndParser {
 					   			   Number num= NumberNormalizer.wordToNumber(word2Name);
 					   			   objNumber= num.longValue();
 					   		   }
-							   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 							   modifiedNode=objectMap.get(objectId1);
 							   modifiedNode.count=objNumber;
 							   objectMap.put(objectId1, modifiedNode);
@@ -424,21 +557,38 @@ public class TaggerAndParser {
 						   //getting of the child node
 						   
 						   //modifiedNode=objectMap.get(word1Name);
-						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
 						   
 						   //getting the parent node
 						   
 						   //parentNode=objectMap.get(word2Name);
-						   objectId2=getObjectIdByName(word2Name,sentenceNumber);
+						   objectId2=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 						   parentNode=objectMap.get(objectId2);
 						   
-						   modifiedNode.location="on"; 
-						   modifiedNode.setParent(parentNode);
-						   objectMap.put(objectId1, modifiedNode);
-						   
-						   parentNode.addChild(modifiedNode);
-						   objectMap.put(objectId2, parentNode);						   
+						   if(modifiedNode.parent==null){
+							   modifiedNode.location="on"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+							 //Removing child	
+							   String oldParentId=modifiedNode.parent.id;
+							   VRMLNode oldParentNode=objectMap.get(oldParentId);
+							   oldParentNode.removeChild(objectId1);
+							   objectMap.put(oldParentId, oldParentNode);						   
+							   
+							   //Setting details 
+							   modifiedNode.location="on"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   							   
+							   //Adding child to new parent
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }						   
 					   }
 				   }
 				   
@@ -446,18 +596,36 @@ public class TaggerAndParser {
 				   else if(dependencyType.equals("nmod:under")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
-						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
 						   //getting the parent node
-						   objectId2=getObjectIdByName(word2Name,sentenceNumber);
+						   objectId2=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 						   parentNode=objectMap.get(objectId2);
 						   
-						   modifiedNode.location="under"; 
-						   modifiedNode.setParent(parentNode);
-						   objectMap.put(objectId1, modifiedNode);
-						   
-						   parentNode.addChild(modifiedNode);
-						   objectMap.put(objectId2, parentNode);						   
+						   if(modifiedNode.parent==null){
+							   modifiedNode.location="under"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+							 //Removing child	
+							   String oldParentId=modifiedNode.parent.id;
+							   VRMLNode oldParentNode=objectMap.get(oldParentId);
+							   oldParentNode.removeChild(objectId1);
+							   objectMap.put(oldParentId, oldParentNode);						   
+							   
+							   //Setting details 
+							   modifiedNode.location="under"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   							   
+							   //Adding child to new parent
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }
+						   					   
 					   }
 				   }
 				   
@@ -465,26 +633,50 @@ public class TaggerAndParser {
 				   else if(dependencyType.equals("nmod:behind")){
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
-						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
 						   //getting the parent node
-						   objectId2=getObjectIdByName(word2Name,sentenceNumber);
+						   objectId2=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 						   parentNode=objectMap.get(objectId2);
 						   
-						   modifiedNode.location="behind"; 
+/*						   modifiedNode.location="behind"; 
 						   modifiedNode.setParent(parentNode);
 						   objectMap.put(objectId1, modifiedNode);
 						   
 						   parentNode.addChild(modifiedNode);
-						   objectMap.put(objectId2, parentNode);						   
+						   objectMap.put(objectId2, parentNode);*/
+						   
+						   if(modifiedNode.parent==null){
+							   modifiedNode.location="behind"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+							 //Removing child	
+							   String oldParentId=modifiedNode.parent.id;
+							   VRMLNode oldParentNode=objectMap.get(oldParentId);
+							   oldParentNode.removeChild(objectId1);
+							   objectMap.put(oldParentId, oldParentNode);						   
+							   
+							   //Setting details 
+							   modifiedNode.location="behind"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   							   
+							   //Adding child to new parent
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }
 					   }
 				   }
 				   
 				   //location front
-				   else if(dependencyType.equals("nmod:in")){
-					   if(objectNames.contains(word1Name)&&word2Name.equals("front")){
+				   else if(dependencyType.equals("nmod:in")&&objectNames.contains(word1Name)&&word2Name.equals("front")){
+					   //if(objectNames.contains(word1Name)&&word2Name.equals("front")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
-							   String[] innerSplit1= dependencyArray[i].split("\\(");
+							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
 							   
 							   String[] innerSplit2 = innerSplit1[1].split(", ");
@@ -499,7 +691,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord1Index=innerWord1[1];
 							   
-							   String[] innerWord2 = split2[1].split("-");
+							   String[] innerWord2 = innerSplit2[1].split("-");
 							   String innerWord2Name=innerWord2[0];
 							   
 								 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
@@ -514,26 +706,50 @@ public class TaggerAndParser {
 								   //getting of the child node
 								   
 								   //modifiedNode=objectMap.get(word1Name);
-								   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   
 								   //parentNode=objectMap.get(innerWord2Name);
-								   objectId2=getObjectIdByName(innerWord2Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="front"; 
+/*								   modifiedNode.location="front"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="front"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="front"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 						   }
 						   
-					   }
+					   //}
 				   }
 				   
 				   //location above
@@ -541,20 +757,44 @@ public class TaggerAndParser {
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
-						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
 						   
 						   //getting the parent node
 						   //parentNode=objectMap.get(word2Name);
-						   objectId2=getObjectIdByName(word2Name,sentenceNumber);
+						   objectId2=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 						   parentNode=objectMap.get(objectId2);
 						   
-						   modifiedNode.location="above"; 
+/*						   modifiedNode.location="above"; 
 						   modifiedNode.setParent(parentNode);
 						   objectMap.put(objectId1, modifiedNode);
 						   
 						   parentNode.addChild(modifiedNode);
-						   objectMap.put(objectId2, parentNode);						   
+						   objectMap.put(objectId2, parentNode);*/
+						   
+						   if(modifiedNode.parent==null){
+							   modifiedNode.location="above"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+							 //Removing child	
+							   String oldParentId=modifiedNode.parent.id;
+							   VRMLNode oldParentNode=objectMap.get(oldParentId);
+							   oldParentNode.removeChild(objectId1);
+							   objectMap.put(oldParentId, oldParentNode);						   
+							   
+							   //Setting details 
+							   modifiedNode.location="above"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   							   
+							   //Adding child to new parent
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }
 					   }
 				   }
 				   
@@ -563,20 +803,44 @@ public class TaggerAndParser {
 					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
-						   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
 						   
 						   //getting the parent node
 						   //parentNode=objectMap.get(word2Name);
-						   objectId2=getObjectIdByName(word2Name,sentenceNumber);
+						   objectId2=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 						   parentNode=objectMap.get(objectId2);
 						   
-						   modifiedNode.location="below"; 
+/*						   modifiedNode.location="below"; 
 						   modifiedNode.setParent(parentNode);
 						   objectMap.put(objectId1, modifiedNode);
 						   
 						   parentNode.addChild(modifiedNode);
-						   objectMap.put(objectId2, parentNode);						   
+						   objectMap.put(objectId2, parentNode);*/
+						   
+						   if(modifiedNode.parent==null){
+							   modifiedNode.location="below"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+							 //Removing child	
+							   String oldParentId=modifiedNode.parent.id;
+							   VRMLNode oldParentNode=objectMap.get(oldParentId);
+							   oldParentNode.removeChild(objectId1);
+							   objectMap.put(oldParentId, oldParentNode);						   
+							   
+							   //Setting details 
+							   modifiedNode.location="below"; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   							   
+							   //Adding child to new parent
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put(objectId2, parentNode);
+						   }
 					   }
 				   }
 				   
@@ -612,20 +876,44 @@ public class TaggerAndParser {
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word1Name);
-								   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord2Name);
-								   objectId2=getObjectIdByName(innerWord2Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="left"; 
+	/*							   modifiedNode.location="left"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 						   }
@@ -662,40 +950,88 @@ public class TaggerAndParser {
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
-								   objectId1=getObjectIdByName(word2Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord1Name);
-								   objectId2=getObjectIdByName(innerWord1Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord1Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="left"; 
+/*								   modifiedNode.location="left"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 							   else if(innerWord1Name.equals("left")&&objectNames.contains(innerWord2Name)){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
-								   objectId1=getObjectIdByName(word2Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord2Name);
-								   objectId2=getObjectIdByName(innerWord2Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="left"; 
+/*								   modifiedNode.location="left"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="left"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 						   }
@@ -734,20 +1070,43 @@ public class TaggerAndParser {
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word1Name);
-								   objectId1=getObjectIdByName(word1Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord2Name);
-								   objectId2=getObjectIdByName(innerWord2Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="right"; 
+/*								   modifiedNode.location="right"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="right"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="right"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 						   }
@@ -784,12 +1143,12 @@ public class TaggerAndParser {
 								   
 								   //getting the child node
 								   //modifiedNode=objectMap.get(word2Name);
-								   objectId1=getObjectIdByName(word2Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord1Name);
-								   objectId2=getObjectIdByName(innerWord1Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord1Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
 								   modifiedNode.location="right"; 
@@ -804,25 +1163,252 @@ public class TaggerAndParser {
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
-								   objectId1=getObjectIdByName(word2Name,sentenceNumber);
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
 								   modifiedNode=objectMap.get(objectId1);
 								   
 								   //getting the parent node
 								   //parentNode=objectMap.get(innerWord2Name);
-								   objectId2=getObjectIdByName(innerWord2Name,sentenceNumber);
+								   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
 								   parentNode=objectMap.get(objectId2);
 								   
-								   modifiedNode.location="right"; 
+/*								   modifiedNode.location="right"; 
 								   modifiedNode.setParent(parentNode);
 								   objectMap.put(objectId1, modifiedNode);
 								   
 								   parentNode.addChild(modifiedNode);
-								   objectMap.put(objectId2, parentNode);
+								   objectMap.put(objectId2, parentNode);*/
+								   if(modifiedNode.parent==null){
+									   modifiedNode.location="right"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+									 //Removing child	
+									   String oldParentId=modifiedNode.parent.id;
+									   VRMLNode oldParentNode=objectMap.get(oldParentId);
+									   oldParentNode.removeChild(objectId1);
+									   objectMap.put(oldParentId, oldParentNode);						   
+									   
+									   //Setting details 
+									   modifiedNode.location="right"; 
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   							   
+									   //Adding child to new parent
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);
+								   }
 								   break;
 							   }
 						   }
 						   
-					   }//end identifying locations
+					   }
+					   
+					   //location next
+					   else if(dependencyType.equals("advmod")&&objectNames.contains(word1Name)&&word2Name.equals("next")){
+							   for(int j=i+1;j<dependencyArray.length;j++){
+								   String[] innerSplit1= dependencyArray[j].split("\\(");
+								   dependencyType = innerSplit1[0];
+								   
+								   String[] innerSplit2 = innerSplit1[1].split(", ");
+								   
+								   String[] innerWord1 = innerSplit2[0].split("-");
+								   String innerWord1Name=innerWord1[0];
+								   
+									 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+									 if(stems3.size()>0){
+										 innerWord1Name= stems3.get(0);
+									 }
+								   
+								   String innerWord1Index=innerWord1[1];
+								   
+								   String[] innerWord2 = innerSplit2[1].split("-");
+								   String innerWord2Name=innerWord2[0];
+								   
+									 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+									 if(stems4.size()>0){
+										 innerWord2Name= stems4.get(0);
+									 }
+								   
+								   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
+								   
+								   if(innerWord1Name.equals("next")&&objectNames.contains(innerWord2Name)){
+									   
+									   //getting of the child node
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   
+									   //getting the parent node
+									   objectId2=getObjectIdByNameAndSentence(innerWord2Name,sentenceNumber);
+									   parentNode=objectMap.get(objectId2);
+									   
+/*									   modifiedNode.location="right"; //Object added to the right of the parent node by default
+									   modifiedNode.setParent(parentNode);
+									   objectMap.put(objectId1, modifiedNode);
+									   
+									   parentNode.addChild(modifiedNode);
+									   objectMap.put(objectId2, parentNode);*/
+									   
+									   if(modifiedNode.parent==null){
+										   modifiedNode.location="right"; 
+										   modifiedNode.setParent(parentNode);
+										   objectMap.put(objectId1, modifiedNode);
+										   
+										   parentNode.addChild(modifiedNode);
+										   objectMap.put(objectId2, parentNode);
+									   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals(objectId2)))){
+										 //Removing child	
+										   String oldParentId=modifiedNode.parent.id;
+										   VRMLNode oldParentNode=objectMap.get(oldParentId);
+										   oldParentNode.removeChild(objectId1);
+										   objectMap.put(oldParentId, oldParentNode);						   
+										   
+										   //Setting details 
+										   modifiedNode.location="right"; 
+										   modifiedNode.setParent(parentNode);
+										   objectMap.put(objectId1, modifiedNode);
+										   							   
+										   //Adding child to new parent
+										   parentNode.addChild(modifiedNode);
+										   objectMap.put(objectId2, parentNode);
+									   }
+									   break;
+								   }
+							   }
+					   }					   
+					   //end identifying locations			   
+					   
+					   //Start identifying location relative to room					   
+					   else if(dependencyType.equals("nmod:in")&&objectNames.contains(word1Name)&&Arrays.asList(roomLocations).contains(word2Name)){
+
+							  
+						   if(word2Name.equals("corner")){
+							   for(int a=0;a<dependencyArray.length;a++){								   
+									   String[] newSplit1= dependencyArray[a].split("\\(");
+									   String newdependencyType=newSplit1[0];
+									   
+									   if(newdependencyType.equals("amod")){
+									   String[] newSplit2 = newSplit1[1].split(", ");
+									   
+									   String[] newWord1 = newSplit2[0].split("-");
+									   String newWord1Name=newWord1[0];
+									   
+										 List<String> newStems3 = stemmer.findStems(newWord1Name, null);
+										 if(newStems3.size()>0){
+											 newWord1Name= newStems3.get(0);
+										 }
+									   
+									   String newWord1Index=newWord1[1];
+									   
+									   String[] newWord2 = newSplit2[1].split("-");
+									   String newWord2Name=newWord2[0];
+									   
+										 List<String> newStems4 = stemmer.findStems(newWord2Name, null);
+										 if(newStems4.size()>0){
+											 newWord2Name= newStems4.get(0);
+										 }
+									   
+									   String newWord2Index=newWord2[1].substring(0,newWord2[1].length()-1);
+									   
+									   if(newWord1Name.equals("corner")&&newWord2Name.equals("left")){
+										   word2Name="leftCorner";
+									   }
+									   else if(newWord1Name.equals("corner")&&newWord2Name.equals("right")){
+										   word2Name="rightCorner";
+									   }
+								   }
+							   }
+						   }
+						   
+						   		//getting of the child node
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+							   modifiedNode=objectMap.get(objectId1);
+							   
+							   //getting the parent node
+							   parentNode=objectMap.get("object0");
+							   
+/*							   modifiedNode.location=word2Name; 
+							   modifiedNode.setParent(parentNode);
+							   objectMap.put(objectId1, modifiedNode);
+							   
+							   parentNode.addChild(modifiedNode);
+							   objectMap.put("object0", parentNode);*/
+							   
+							   if(modifiedNode.parent==null){
+								   modifiedNode.location=word2Name; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(objectId1, modifiedNode);
+								   
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put("object0", parentNode);
+							   }else if((!(modifiedNode.parent==null))&&(!((modifiedNode.parent.id).equals("object0")))){
+								 //Removing child	
+								   String oldParentId=modifiedNode.parent.id;
+								   VRMLNode oldParentNode=objectMap.get(oldParentId);
+								   oldParentNode.removeChild(objectId1);
+								   objectMap.put(oldParentId, oldParentNode);						   
+								   
+								   //Setting details 
+								   modifiedNode.location=word2Name; 
+								   modifiedNode.setParent(parentNode);
+								   objectMap.put(objectId1, modifiedNode);
+								   							   
+								   //Adding child to new parent
+								   parentNode.addChild(modifiedNode);
+								   objectMap.put("object0", parentNode);
+							   }
+					   }
+					   
+					   
+					   //End identifying location relative to room
+					   
+			
+					   //Start identifying orientation
+					   else if(dependencyType.equals("acl")){
+						   if(objectNames.contains(word1Name)&&word2Name.equals("facing")){
+							   for(int j=i+1;j<dependencyArray.length;j++){
+								   String[] innerSplit1= dependencyArray[i].split("\\(");
+								   dependencyType = innerSplit1[0];
+								   
+								   String[] innerSplit2 = innerSplit1[1].split(", ");
+								   
+								   String[] innerWord1 = innerSplit2[0].split("-");
+								   String innerWord1Name=innerWord1[0];
+								   
+									 List<String> stems3 = stemmer.findStems(innerWord1Name, null);
+									 if(stems3.size()>0){
+										 innerWord1Name= stems3.get(0);
+									 }
+								   
+								   String innerWord1Index=innerWord1[1];
+								   
+								   String[] innerWord2 = split2[1].split("-");
+								   String innerWord2Name=innerWord2[0];
+								   
+									 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
+									 if(stems4.size()>0){
+										 innerWord2Name= stems4.get(0);
+									 }
+								   
+								   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
+								   
+								   if(innerWord1Name.equals("facing")&&Arrays.asList(orientations).contains(innerWord2Name)){
+									   
+									   //getting the node
+									   
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);									   
+									   modifiedNode.orientation=innerWord2Name; 
+									   objectMap.put(objectId1, modifiedNode);									   
+									   break;
+								   }
+							   }
+							   
+						   }
+					   }
+					   //End identifying orientation
 					   
 			   }//Dependency parser end
 			   
@@ -853,7 +1439,7 @@ public class TaggerAndParser {
 	}
 	
     //Method to get object Id by defining name and sentence
-    public String getObjectIdByName(String objName, int sentenceNum){   	
+    public String getObjectIdByNameAndSentence(String objName, int sentenceNum){   	
     	String objectId="";		
     	for (Entry<String, ArrayList<ObjectMention>> obj : objectMentionsMap.entrySet()) {
 		    String key = obj.getKey();
@@ -861,6 +1447,23 @@ public class TaggerAndParser {
 		    for(ObjectMention objMention:objMentions){
 		    	if((objMention.name.equals(objName))&&(objMention.sentence==sentenceNum)){
 		    		objectId=key;
+		    		break;
+		    	}
+		    }
+		}   	
+    	return objectId;
+    }
+    
+    //Method to get object Id by defining only name
+    public String getObjectIdByName(String objName){   	
+    	String objectId="";		
+    	for (Entry<String, ArrayList<ObjectMention>> obj : objectMentionsMap.entrySet()) {
+		    String key = obj.getKey();
+		    ArrayList<ObjectMention> objMentions = obj.getValue();
+		    for(ObjectMention objMention:objMentions){
+		    	if((objMention.name.equals(objName))){
+		    		objectId=key;
+		    		break;
 		    	}
 		    }
 		}   	
