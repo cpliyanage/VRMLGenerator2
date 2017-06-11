@@ -169,7 +169,7 @@ public class CodeGenerator {
 		attributes.initializeOrientations("table");
 		
 		String rotation=attributes.orientationTable.get(orientation);
-		String cordinates= "0.0 -3.50 0.0";//"0.0 0.0 0.0"
+		String cordinates= "0.0 0.0 0.0";//"0.0 0.0 0.0"
 		//String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){

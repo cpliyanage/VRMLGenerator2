@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JButton;
@@ -10,6 +11,7 @@ import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import javax.swing.ImageIcon;
 
 
 public class Interface {
@@ -24,6 +26,13 @@ public class Interface {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
+		try {
+			UIManager.setLookAndFeel("com.jtattoo.plaf.hifi.HiFiLookAndFeel");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -53,26 +62,30 @@ public class Interface {
 		frame.getContentPane().setLayout(null);
 		
 		textField = new JTextField();
-		textField.setBounds(30, 61, 356, 64);
+		textField.setBounds(30, 33, 379, 92);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);		
 		
-		JLabel lblDescription = new JLabel("Description");
+		JLabel lblDescription = new JLabel("Enter Description");
 		lblDescription.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblDescription.setBounds(30, 27, 82, 23);
+		lblDescription.setBounds(30, 11, 119, 23);
 		frame.getContentPane().add(lblDescription);
 		
 		JButton btnGenerateVrml = new JButton("Generate VRML");
-		btnGenerateVrml.setBounds(76, 136, 142, 23);
+		btnGenerateVrml.setFont(new Font("Rockwell", Font.PLAIN, 14));
+		btnGenerateVrml.setIcon(new ImageIcon("C:\\Users\\Dell\\Desktop\\Mimetype-make-icon.png"));
+		btnGenerateVrml.setBounds(30, 136, 191, 50);
 		frame.getContentPane().add(btnGenerateVrml);
 		
 		JButton btnClear = new JButton("Clear");
-		btnClear.setBounds(243, 136, 89, 23);
+		btnClear.setFont(new Font("Rockwell", Font.PLAIN, 14));
+		btnClear.setIcon(new ImageIcon("C:\\Users\\Dell\\Desktop\\Actions-edit-clear-icon.png"));
+		btnClear.setBounds(242, 136, 167, 50);
 		frame.getContentPane().add(btnClear);
 		
 		JLabel lblOutput = new JLabel("Output");
 		lblOutput.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblOutput.setBounds(30, 185, 46, 14);
+		lblOutput.setBounds(30, 197, 66, 23);
 		frame.getContentPane().add(lblOutput);
 		
 		final JLabel lblNewLabel = new JLabel("");
