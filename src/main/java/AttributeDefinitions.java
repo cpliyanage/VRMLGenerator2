@@ -22,8 +22,8 @@ public class AttributeDefinitions {
 			if (shape.equalsIgnoreCase("chair")){
 			orientationTable.put("front", "0 1 0 1.5708");
 			orientationTable.put("backward", "0 1 0 4.7124");
-			orientationTable.put("left", "0 1 0 3.1416");
-			orientationTable.put("right", "0 0 0 0");
+			orientationTable.put("left", "0 0 0 0");
+			orientationTable.put("right", "0 1 0 3.1416");
 		   }
 			else if (shape.equalsIgnoreCase("bed")){
 			orientationTable.put("front", "0 1 0 3.1416");
@@ -87,32 +87,32 @@ public class AttributeDefinitions {
 		   double z = Double.parseDouble(arr[2]);
 		   
 		   if(relativeLocation.equals("left")){
-			   x=x-3;
+			   x=x-1.5;
 		   }
 		   else if(relativeLocation.equals("right")){
-			   x=x+3;
+			   x=x+1.5;
 		   }
-		   else if(relativeLocation.equals("above")||relativeLocation.equals("top")){
+		   else if(relativeLocation.equals("above")){
 			   if(parentShape.equals("table")){
-				   y=y+0.615+3;
+				   y=y+0.615+1.5;
 			   }
 			   else if(parentShape.equals("chair")){
-				   y=y+0.5+3;
+				   y=y+0.5+1.3;
 			   }
 			   else{
-				   y=y+0.5+3;
+				   y=y+0.5+1.5;
 			   }
 		   }
 		   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){ //Need reconsideration
-			   y=y-3;
+			   y=y-1.5;
 		   }
 		   else if(relativeLocation.equals("front")){
-			   z=z+3;
+			   z=z+1.5;
 		   }
 		   else if(relativeLocation.equals("behind")){
-			   z=z-3;
+			   z=z-1.5;
 		   }
-		   else if(relativeLocation.equals("on")){
+		   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 			   if(shape.equals("box")){
 				   String Currentsize =sizeTable.get(size);
 				   String[] sSplit  = Currentsize.split(" ");
@@ -193,36 +193,37 @@ public class AttributeDefinitions {
 			   double y1 = Double.parseDouble(arr1[1]);
 			   double z1 = Double.parseDouble(arr1[2]);
 			   
-			   //Current cordinates
+		/*	   //Current cordinates
 			   String arr2[]=currentCordinates.split(" ");
 			   double x2 = Double.parseDouble(arr2[0]);
 			   double y2 = Double.parseDouble(arr2[1]);
-			   double z2 = Double.parseDouble(arr2[2]);
+			   double z2 = Double.parseDouble(arr2[2]); */
 			   			   			   
 			   //old cordinates are the cordinates of the object relative to origin
 			   if(relativeLocation.equals("left")){
-				   x2=x1-3;
+				   x1=x1-1.5;
 			   }
 			   else if(relativeLocation.equals("right")){
-				   x2=x1+3;
+				   x1=x1+1.5;
 			   }
-			   else if(relativeLocation.equals("above")||relativeLocation.equals("top")){
-				   y2=y1+3;
+			   else if(relativeLocation.equals("above")){
+				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   y2=y1-3;
+				   //y1=y1-1.5;
+				   x1=x1+0.25;
 			   }
-			   else if(relativeLocation.equals("on")){
-				   y2=y1+0.2;
+			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
+				   y1=y1+0.2;
 			   }
 			   else if(relativeLocation.equals("front")){
-				   z2=z1+3;
+				   z1=z1+1.5;
 			   }
 			   else if(relativeLocation.equals("behind")){
-				   z2=z1-3;
+				   z1=z1-1.5;
 			   }
 			   
-			   newCordinates = x2+" "+y2+" "+z2;
+			   newCordinates = x1+" "+y1+" "+z1;
 			   
 		   }
 		   
@@ -236,34 +237,35 @@ public class AttributeDefinitions {
 			   double z1 = Double.parseDouble(arr1[2]);
 			   
 			   //Current cordinates
-			   String arr2[]=currentCordinates.split(" ");
+		/*	   String arr2[]=currentCordinates.split(" ");
 			   double x2 = Double.parseDouble(arr2[0]);
 			   double y2 = Double.parseDouble(arr2[1]);
-			   double z2 = Double.parseDouble(arr2[2]);
+			   double z2 = Double.parseDouble(arr2[2]); */
 			   			   			   
 			   //old cordinates are the cordinates of the object relative to origin
 			   if(relativeLocation.equals("left")){
-				   x2=x1-4;
+				   x1=x1-2;
 			   }
 			   else if(relativeLocation.equals("right")){
-				   x2=x1+4;
+				   x1=x1+2;
 			   }
-			   else if(relativeLocation.equals("above")||relativeLocation.equals("top")){
-				   y2=y1+3;
+			   else if(relativeLocation.equals("above")){
+				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   y2=y1-3;
+				   //y1=y1-1.5;
+				   x1=x1+0.25;
 			   }
-			   else if(relativeLocation.equals("on")){
-				   y2=y1+0.2;
+			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
+				   y1=y1+0.2;
 			   }
 			   else if(relativeLocation.equals("front")){
-				   z2=z1+3;
+				   z1=z1+1.5;
 			   }
 			   else if(relativeLocation.equals("behind")){
-				   z2=z1-3;
+				   z1=z1-1.5;
 			   }			   
-			   newCordinates = x2+" "+y2+" "+z2;			   
+			   newCordinates = x1+" "+y1+" "+z1;			   
 		   }
 		   
 		   //Shape table lamp
@@ -275,45 +277,46 @@ public class AttributeDefinitions {
 			   double y1 = Double.parseDouble(arr1[1]);
 			   double z1 = Double.parseDouble(arr1[2]);
 			   
-			   //Current cordinates
+		/*	   //Current cordinates
 			   String arr2[]=currentCordinates.split(" ");
 			   double x2 = Double.parseDouble(arr2[0]);
 			   double y2 = Double.parseDouble(arr2[1]);
-			   double z2 = Double.parseDouble(arr2[2]);
+			   double z2 = Double.parseDouble(arr2[2]); */
 			   			   			   
 			   //old cordinates are the cordinates of the object relative to origin
 			   if(relativeLocation.equals("left")){
-				   x2=x1-3;
+				   x1=x1-1.5;
 			   }
 			   else if(relativeLocation.equals("right")){
-				   x2=x1+3;
+				   x1=x1+1.5;
 			   }
-			   else if(relativeLocation.equals("above")||relativeLocation.equals("top")){
-				   y2=y1+3;
+			   else if(relativeLocation.equals("above")){
+				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   y2=y1-3;
+				   //y1=y1-1.5;
+				   x1=x1+0.25;
 			   }
-			   else if(relativeLocation.equals("on")){
+			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 				   
 				   if(parentShape.equals("table")){
-					   y2=y1+0.615+0.01;
-					   x2=x1-0.5;
+					   y1=y1+0.615+0.01;
+					   x1=x1-0.25;
 				   }
 				   else if(parentShape.equals("chair")){
-					   y2=y1+0.5+0.2;
+					   y1=y1+0.5+0.2;
 				   }
 				   else{
-					   y2=y1+0.2;
+					   y1=y1+0.2;
 				   }
 			   }
 			   else if(relativeLocation.equals("front")){
-				   z2=z1+3;
+				   z1=z1+1.5;
 			   }
 			   else if(relativeLocation.equals("behind")){
-				   z2=z1-3;
+				   z1=z1-1.5;
 			   }			   
-			   newCordinates = x2+" "+y2+" "+z2;			   
+			   newCordinates = x1+" "+y1+" "+z1;			   
 		   }
 		   return newCordinates;
 	   }

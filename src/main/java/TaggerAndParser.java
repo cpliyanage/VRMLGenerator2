@@ -42,14 +42,17 @@ public class TaggerAndParser {
 	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
 	int objectCount;
 	
-	String locations[]={"left","right","above","below","front","behind","top", "under","on", "next"};
+	String[] locations={"left","right","above","below","front","behind","top", "under","on", "next"};
 	String[] roomLocations={"middle", "corner"};
-	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed"};
-	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
-	static String[] sizes = {"small","regular","medium", "large"};
-	static String[] types= {"round","square", "ceiling"};
+	String[] textures= {"wooden","glass","metal"};
 	String[] roomTextures= {"wooden","brick"};
 	String[] orientations= {"front","backward", "left", "right"};
+	String[] pronouns={"this","these","that","those","it"};
+	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed","ball"};
+	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
+	static String[] sizes = {"small","regular","medium", "large"};
+	static String[] types= {"round","square", "ceiling","coffee"};
+
 	
 	public String tagContent(String input) throws IOException{
 		
@@ -163,7 +166,7 @@ public class TaggerAndParser {
 	    	 corefResult=corefResult.substring(corefResult.indexOf("[")+1, corefResult.length()-1);
 	    	 
 	    	 //Array to store the mentions in a single coreference chain (mentions of a single object)
-	    	 String[] mentions=corefResult.split(",");
+	    	 String[] mentions=corefResult.split(", ");
 	    	 if(mentions.length>0){
 	    		 String[] fSplit=mentions[0].split(" in sentence ");
 	    		//sentence number of the mention
@@ -185,7 +188,7 @@ public class TaggerAndParser {
 	    	    		
 	    	    		 //For each word of a mention
 	    		    	for(String word:words){
-	    		    		if(nounsPresent.contains(word)){	 
+	    		    		if(nounsPresent.contains(word)||Arrays.asList(pronouns).contains(word)){	 
 	    						 String stemWord=word;
 	    						 
 	    						 //Obtaining stem of the word						 
@@ -194,7 +197,7 @@ public class TaggerAndParser {
 	    							 stemWord= stems.get(0);
 	    						 }
 	    						 
-	    		    			 if(Arrays.asList(objects).contains(stemWord)){
+	    		    			 if(Arrays.asList(objects).contains(stemWord)||Arrays.asList(pronouns).contains(stemWord)){
 	    		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber);
 	    		    				 if(!objectPresent){
 	    		    				 //Adding the mention of the object to the mentions list
@@ -335,7 +338,7 @@ public class TaggerAndParser {
 	    			 }
 	    			 
 	    			 //location relative to another object
-	    			 if(Arrays.asList(locations).contains(firstMentionWords[x])){
+	    			 if(Arrays.asList(locations).contains(firstMentionWords[x])&&(!(Arrays.asList(firstMentionWords).contains("facing")))){
 	    				 
 	    				 if(firstMentionWords[x].equals("next")){
 	    					 currentNode.location="right";
@@ -344,14 +347,36 @@ public class TaggerAndParser {
 	    				 
 	    				 //logic to find parent name
 	    				 for(int y=x+1;y<firstMentionWords.length;y++){
-	    					 if(Arrays.asList(objects).contains(firstMentionWords[y])){
+	    					 if(Arrays.asList(objects).contains(firstMentionWords[y])||Arrays.asList(pronouns).contains(firstMentionWords[y])){
 	    	    				 String currentParentId=getObjectIdByName(firstMentionWords[y]);
 	    	    				 if(!currentParentId.equals("")){
 	    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
 	    		    				 currentNode.parent=currentParent; 
 	    		    				 currentParent.addChild(currentNode);
 	    	    				 }
-	    					 }
+	    					 }else{
+				  				 //Check synonyms
+			    				 String wsynonym =getSynonyms(dict,firstMentionWords[y],"object");
+			    				 if(!wsynonym.equals("")){
+		    	    				 String currentParentId=getObjectIdByName(wsynonym);
+		    	    				 if(!currentParentId.equals("")){
+		    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
+		    		    				 currentNode.parent=currentParent; 
+		    		    				 currentParent.addChild(currentNode);
+		    	    				 }
+				    			}else{
+			    					 //Check Hypernyms 
+			    					 String whypernym=getHypernyms(dict,firstMentionWords[y],"object");
+			    					 if(!whypernym.equals("")){
+			    	    				 String currentParentId=getObjectIdByName(whypernym);
+			    	    				 if(!currentParentId.equals("")){
+			    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
+			    		    				 currentNode.parent=currentParent; 
+			    		    				 currentParent.addChild(currentNode);
+			    	    				 } 
+				    				 }			    				 
+				    			}					   
+			    			 }
 	    				 }	    				 
 	    			 }
 	    		 }
@@ -412,12 +437,37 @@ public class TaggerAndParser {
 					 }
 				   
 				   String word2Index=word2[1].substring(0,word2[1].length()-1);
+				   
+				   //Checking for synonyms and hypernyms of object and replacing object names with synonyms and hypernyms
+	    			 if(!(objectNames.contains(word1Name))&&!(Arrays.asList(pronouns).contains(word1Name))){
+	    				 String synonym =getSynonyms(dict,word1Name,"object");
+	    				 if(!(synonym.equals(""))){
+	    					 word1Name=synonym;
+	    				 }else{
+	    					 String hypernym=getHypernyms(dict,word1Name,"object");
+	    					 if(!hypernym.equals("")){
+	    						 word1Name=hypernym;
+	    					 }
+	    				 }
+	    			 }
+	    			 
+	    			 if(!(objectNames.contains(word2Name))&&!(Arrays.asList(pronouns).contains(word1Name))){
+	    				 String synonym =getSynonyms(dict,word2Name,"object");
+	    				 if(!(synonym.equals(""))){
+	    					 word2Name=synonym;
+	    				 }else{
+	    					 String hypernym=getHypernyms(dict,word2Name,"object");
+	    					 if(!hypernym.equals("")){
+	    						 word2Name=hypernym;
+	    					 }
+	    				 }
+	    			 }
 				   				   
 				   //start identifying attributes
 				   String objectId1;
 				   String objectId2;
 				   
-				   //Identifying colour
+				  //Identifying colour
 				   if(dependencyType.equals("amod")||dependencyType.equals("compound")||dependencyType.equals("acl:relcl")){
 					   
 					   //identifying room colour 
@@ -444,10 +494,10 @@ public class TaggerAndParser {
 				    				 }			    				 
 				    			}
 						   }
-					   }
+					   }					   
 					   
-					   
-					   if(objectNames.contains(word1Name)){
+					   //Identifying attributes of objects
+					   if(objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name))){
 						   
 						   //Identifying the colour of the object
 						   if(Arrays.asList(colours).contains(word2Name)){
@@ -510,7 +560,7 @@ public class TaggerAndParser {
 							   modifiedNode.type=word2Name;
 							   objectMap.put(objectId1, modifiedNode);
 						   }else{
-				  				 //Check synonyms to get the object name
+				  				 //Check synonyms to get the type name
 			    				 String synonym =getSynonyms(dict,word2Name,"type");
 			    				 if(!synonym.equals("")){
 									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
@@ -518,7 +568,7 @@ public class TaggerAndParser {
 									   modifiedNode.colour=synonym;
 									   objectMap.put(objectId1, modifiedNode);
 				    			}else{
-			    					 //Check Hypernyms to get object name
+			    					 //Check Hypernyms to get type name
 			    					 String hypernym=getHypernyms(dict,word2Name,"type");
 			    					 if(!hypernym.equals("")){
 										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
@@ -531,10 +581,93 @@ public class TaggerAndParser {
 						   }
 					   }
 				   }
+				   
+				   //Setting attributes when pronouns are used
+				   if(dependencyType.equals("nsubj")&&objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name))){
+					   //Identifying the colour of the object
+					   if(Arrays.asList(colours).contains(word1Name)){
+						   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+						   modifiedNode=objectMap.get(objectId1);
+						   modifiedNode.colour=word1Name;
+						   objectMap.put(objectId1, modifiedNode);							   
+					   }else{
+			  				 //Check synonyms
+		    				 String synonym =getSynonyms(dict,word1Name,"colour");
+		    				 if(!synonym.equals("")){
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+								   modifiedNode=objectMap.get(objectId1);
+								   modifiedNode.colour=synonym;
+								   objectMap.put(objectId1, modifiedNode);
+			    			}else{
+		    					 //Check Hypernyms 
+		    					 String hypernym=getHypernyms(dict,word1Name,"colour");
+		    					 if(!hypernym.equals("")){
+									   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.colour=hypernym;
+									   objectMap.put(objectId1, modifiedNode);
+			    				 }			    				 
+			    			}
+					   }
+					   
+					 //Identifying the size of the object
+					   if(Arrays.asList(sizes).contains(word1Name)){							   
+						   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+						   modifiedNode=objectMap.get(objectId1);
+						   modifiedNode.size=word1Name;
+						   objectMap.put(objectId1, modifiedNode);
+					   }else{
+			  				 //Check synonyms 
+		    				 String synonym =getSynonyms(dict,word1Name,"size");
+		    				 if(!synonym.equals("")){
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+								   modifiedNode=objectMap.get(objectId1);
+								   modifiedNode.size=synonym;
+								   objectMap.put(objectId1, modifiedNode);
+			    			}else{
+		    					 //Check Hypernyms
+		    					 String hypernym=getHypernyms(dict,word1Name,"size");
+		    					 if(!hypernym.equals("")){
+									   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.size=hypernym;
+									   objectMap.put(objectId1, modifiedNode);
+			    				 }			    				 
+			    			}
+					   
+					   }
+					   
+					   //Identify the type of object
+					   if(Arrays.asList(types).contains(word1Name)){					   
+						   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+						   modifiedNode=objectMap.get(objectId1);
+						   modifiedNode.type=word1Name;
+						   objectMap.put(objectId1, modifiedNode);
+					   }else{
+			  				 //Check synonyms to get the type name
+		    				 String synonym =getSynonyms(dict,word1Name,"type");
+		    				 if(!synonym.equals("")){
+								   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+								   modifiedNode=objectMap.get(objectId1);
+								   modifiedNode.colour=synonym;
+								   objectMap.put(objectId1, modifiedNode);
+			    			}else{
+		    					 //Check Hypernyms to get type name
+		    					 String hypernym=getHypernyms(dict,word1Name,"type");
+		    					 if(!hypernym.equals("")){
+									   objectId1=getObjectIdByNameAndSentence(word2Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.type=hypernym;
+									   objectMap.put(objectId1, modifiedNode);
+			    				 }			    				 
+			    			}					   
+					   }					   
+				   }
+				   
 				   //end identifying attributes
 				   
 				   //Start obtaining count		   				  
-				   else if(dependencyType.equals("nummod")){
+				   else if(dependencyType.equals("nummod")&& (objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))){
 							   //modifiedNode=objectMap.get(word1Name);
 					   		   long objNumber=1;
 					   		   if(!(NumberNormalizer.wordToNumber(word2Name)==null)){
@@ -552,7 +685,7 @@ public class TaggerAndParser {
 				   
 				   //location on
 				   else if(dependencyType.equals("nmod:on")){
-					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
+					   if((objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))&&(objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name)))){
 						   
 						   //getting of the child node
 						   
@@ -594,7 +727,7 @@ public class TaggerAndParser {
 				   
 				   //location under
 				   else if(dependencyType.equals("nmod:under")){
-					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
+					   if((objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))&&(objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name)))){
 						   //getting of the child node
 						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
@@ -631,7 +764,7 @@ public class TaggerAndParser {
 				   
 				   //location behind
 				   else if(dependencyType.equals("nmod:behind")){
-					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
+					   if((objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))&&(objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name)))){
 						   //getting of the child node
 						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 						   modifiedNode=objectMap.get(objectId1);
@@ -673,7 +806,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location front
-				   else if(dependencyType.equals("nmod:in")&&objectNames.contains(word1Name)&&word2Name.equals("front")){
+				   else if(dependencyType.equals("nmod:in")&&(objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&word2Name.equals("front")){
 					   //if(objectNames.contains(word1Name)&&word2Name.equals("front")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[j].split("\\(");
@@ -701,7 +834,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(innerWord1Name.equals("front")&&objectNames.contains(innerWord2Name)){
+							   if(innerWord1Name.equals("front")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 								   
 								   //getting of the child node
 								   
@@ -754,7 +887,7 @@ public class TaggerAndParser {
 				   
 				   //location above
 				   else if(dependencyType.equals("nmod:above")){
-					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
+					   if((objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))&&(objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name)))){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
 						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
@@ -800,7 +933,7 @@ public class TaggerAndParser {
 				   
 				   //location below
 				   else if(dependencyType.equals("nmod:below")){
-					   if(objectNames.contains(word1Name)&&objectNames.contains(word2Name)){
+					   if((objectNames.contains(word1Name)||(Arrays.asList(pronouns).contains(word1Name)))&&(objectNames.contains(word2Name)||(Arrays.asList(pronouns).contains(word2Name)))){
 						   //getting of the child node
 						   //modifiedNode=objectMap.get(word1Name);
 						   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
@@ -845,7 +978,7 @@ public class TaggerAndParser {
 				   }
 				   
 				   //location left
-					   if(objectNames.contains(word1Name)&&word2Name.equals("left")){
+					   if((objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&word2Name.equals("left")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
@@ -872,7 +1005,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(innerWord1Name.equals("left")&&objectNames.contains(innerWord2Name)){
+							   if(innerWord1Name.equals("left")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word1Name);
@@ -919,7 +1052,7 @@ public class TaggerAndParser {
 						   }
 						   
 					   }
-					   else if(word1Name.equals("left")&&objectNames.contains(word2Name)){
+					   else if(word1Name.equals("left")&&(objectNames.contains(word2Name)||Arrays.asList(pronouns).contains(word2Name))){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
@@ -946,7 +1079,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("left")){
+							   if((objectNames.contains(innerWord1Name)||Arrays.asList(pronouns).contains(innerWord1Name))&&innerWord2Name.equals("left")){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
@@ -990,7 +1123,7 @@ public class TaggerAndParser {
 								   }
 								   break;
 							   }
-							   else if(innerWord1Name.equals("left")&&objectNames.contains(innerWord2Name)){
+							   else if(innerWord1Name.equals("left")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
@@ -1039,7 +1172,7 @@ public class TaggerAndParser {
 					   }
 				   
 				   //location right
-					   if(objectNames.contains(word1Name)&&word2Name.equals("right")){
+					   if((objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&word2Name.equals("right")){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
@@ -1066,7 +1199,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
+							   if(innerWord1Name.equals("right")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word1Name);
@@ -1112,7 +1245,7 @@ public class TaggerAndParser {
 						   }
 						   
 					   }
-					   else if(word1Name.equals("right")&&objectNames.contains(word2Name)){
+					   else if(word1Name.equals("right")&&(objectNames.contains(word2Name)||Arrays.asList(pronouns).contains(word2Name))){
 						   for(int j=i+1;j<dependencyArray.length;j++){
 							   String[] innerSplit1= dependencyArray[j].split("\\(");
 							   dependencyType = innerSplit1[0];
@@ -1139,7 +1272,7 @@ public class TaggerAndParser {
 							   
 							   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 							   
-							   if(objectNames.contains(innerWord1Name)&&innerWord2Name.equals("right")){
+							   if((objectNames.contains(innerWord1Name)||Arrays.asList(pronouns).contains(innerWord1Name))&&innerWord2Name.equals("right")){
 								   
 								   //getting the child node
 								   //modifiedNode=objectMap.get(word2Name);
@@ -1159,7 +1292,7 @@ public class TaggerAndParser {
 								   objectMap.put(objectId2, parentNode);
 								   break;
 							   }
-							   else if(innerWord1Name.equals("right")&&objectNames.contains(innerWord2Name)){
+							   else if(innerWord1Name.equals("right")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 								   
 								   //getting of the child node
 								   //modifiedNode=objectMap.get(word2Name);
@@ -1207,7 +1340,7 @@ public class TaggerAndParser {
 					   }
 					   
 					   //location next
-					   else if(dependencyType.equals("advmod")&&objectNames.contains(word1Name)&&word2Name.equals("next")){
+					   if(dependencyType.equals("advmod")&&(objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&word2Name.equals("next")){
 							   for(int j=i+1;j<dependencyArray.length;j++){
 								   String[] innerSplit1= dependencyArray[j].split("\\(");
 								   dependencyType = innerSplit1[0];
@@ -1234,7 +1367,7 @@ public class TaggerAndParser {
 								   
 								   String innerWord2Index=innerWord2[1].substring(0,word2[1].length()-1);
 								   
-								   if(innerWord1Name.equals("next")&&objectNames.contains(innerWord2Name)){
+								   if(innerWord1Name.equals("next")&&(objectNames.contains(innerWord2Name)||Arrays.asList(pronouns).contains(innerWord2Name))){
 									   
 									   //getting of the child node
 									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
@@ -1281,7 +1414,7 @@ public class TaggerAndParser {
 					   //end identifying locations			   
 					   
 					   //Start identifying location relative to room					   
-					   else if(dependencyType.equals("nmod:in")&&objectNames.contains(word1Name)&&Arrays.asList(roomLocations).contains(word2Name)){
+					   if(dependencyType.equals("nmod:in")&&(objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&Arrays.asList(roomLocations).contains(word2Name)){
 
 							  
 						   if(word2Name.equals("corner")){
@@ -1366,10 +1499,10 @@ public class TaggerAndParser {
 					   
 			
 					   //Start identifying orientation
-					   else if(dependencyType.equals("acl")){
-						   if(objectNames.contains(word1Name)&&word2Name.equals("facing")){
+					   if(dependencyType.equals("acl")&&(objectNames.contains(word1Name)||Arrays.asList(pronouns).contains(word1Name))&&word2Name.equals("facing")){
+						  
 							   for(int j=i+1;j<dependencyArray.length;j++){
-								   String[] innerSplit1= dependencyArray[i].split("\\(");
+								   String[] innerSplit1= dependencyArray[j].split("\\(");
 								   dependencyType = innerSplit1[0];
 								   
 								   String[] innerSplit2 = innerSplit1[1].split(", ");
@@ -1384,7 +1517,7 @@ public class TaggerAndParser {
 								   
 								   String innerWord1Index=innerWord1[1];
 								   
-								   String[] innerWord2 = split2[1].split("-");
+								   String[] innerWord2 = innerSplit2[1].split("-");
 								   String innerWord2Name=innerWord2[0];
 								   
 									 List<String> stems4 = stemmer.findStems(innerWord2Name, null);
@@ -1404,7 +1537,7 @@ public class TaggerAndParser {
 									   objectMap.put(objectId1, modifiedNode);									   
 									   break;
 								   }
-							   }
+							   
 							   
 						   }
 					   }

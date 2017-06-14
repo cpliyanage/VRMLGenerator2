@@ -1,3 +1,4 @@
+import java.awt.Desktop;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -10,6 +11,7 @@ import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import javax.swing.ImageIcon;
 
@@ -100,6 +102,10 @@ public class Interface {
 				try {
 					String output=taggerAndParser.tagContent(input);
 					lblNewLabel.setText(output);
+					//Opening the file in browser
+					String url="generated.wrl";
+					File vrmlFile = new File(url);
+					Desktop.getDesktop().browse(vrmlFile.toURI());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
