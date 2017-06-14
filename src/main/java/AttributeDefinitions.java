@@ -6,6 +6,7 @@ public class AttributeDefinitions {
 	Hashtable<String, String> colourTable = new Hashtable<String, String>();
 	Hashtable<String, String> sizeTable = new Hashtable<String, String>();
 	Hashtable<String, String> orientationTable = new Hashtable<String, String>();
+	Hashtable<String, String> textureTable = new Hashtable<String, String>();
 	
 	 // Create a hash map for colours   
 		public void initializeColours() {
@@ -16,6 +17,15 @@ public class AttributeDefinitions {
 	      colourTable.put("black", "0.0 0.0 0.0");
 	      colourTable.put("white", "1.0 1.0 1.0");
 	   }
+		
+		 // Create a hash map for colours   
+			public void initializeTextures() {
+				textureTable.put("wood", " texture ImageTexture { url \"wood.jpg\" } ");
+				textureTable.put("wooden", " texture ImageTexture { url \"wood.jpg\" } ");
+				textureTable.put("metal", " texture ImageTexture { url \"steel.jpg\" } ");
+				textureTable.put("steel", " texture ImageTexture { url \"steel.jpg\" } ");
+				textureTable.put("glass", " texture ImageTexture { url \"glass.jpg\" } ");
+		   }
 		
 	 // Create a hash map for orientations   
 		public void initializeOrientations(String shape) {

@@ -6,6 +6,7 @@ public class VRMLNode{
     String name;
 	String location; // location relative to the parent
 	String colour;
+	String texture;
 	String size;
 	String type;
 	String cordinates;
@@ -14,6 +15,7 @@ public class VRMLNode{
 	
 	ArrayList<VRMLNode> children = new ArrayList<VRMLNode>();
     VRMLNode parent = null;
+    VRMLNode parent2 = null;
     
     public VRMLNode(String id) {
         this.id = id;

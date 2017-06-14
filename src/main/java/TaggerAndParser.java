@@ -23,7 +23,6 @@ import edu.mit.jwi.morph.WordnetStemmer;
 import edu.stanford.nlp.coref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
@@ -32,7 +31,6 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.ie.NumberNormalizer;
 
@@ -44,7 +42,7 @@ public class TaggerAndParser {
 	
 	String[] locations={"left","right","above","below","front","behind","top", "under","on", "next"};
 	String[] roomLocations={"middle", "corner"};
-	String[] textures= {"wooden","glass","metal"};
+	static String[] textures= {"wooden","wood","glass","metal","steel"};
 	String[] roomTextures= {"wooden","brick"};
 	String[] orientations= {"front","backward", "left", "right"};
 	String[] pronouns={"this","these","that","those","it"};
@@ -261,6 +259,9 @@ public class TaggerAndParser {
 		    	 
 		    	 //Checking for attributes		    	 
 	    		 String[] mentionSplit=mentions[0].split(" in sentence ");
+	    		 //Sentence number
+	    		 int fMentionSentence=Integer.parseInt(mentionSplit[1]);
+	    		 
 	    		 //text part of the mention
 	    		 mentionSplit[0]=mentionSplit[0].substring(1, mentionSplit[0].length()-1);
 	    		 String[] firstMentionWords=mentionSplit[0].split(" ");
@@ -280,6 +281,23 @@ public class TaggerAndParser {
 		    					 String whypernym=getHypernyms(dict,firstMentionWords[x],"colour");
 		    					 if(!whypernym.equals("")){
 		    						 currentNode.colour=whypernym;
+			    				 }			    				 
+			    			}					   
+		    			 }
+		    			 
+	    				 //texture
+		    			 if((Arrays.asList(textures).contains(firstMentionWords[x]))){
+		    				 currentNode.texture=firstMentionWords[x];
+		    			 }else{
+			  				 //Check synonyms
+		    				 String wsynonym =getSynonyms(dict,firstMentionWords[x],"texture");
+		    				 if(!wsynonym.equals("")){
+		    					 currentNode.texture=wsynonym;
+			    			}else{
+		    					 //Check Hypernyms 
+		    					 String whypernym=getHypernyms(dict,firstMentionWords[x],"texture");
+		    					 if(!whypernym.equals("")){
+		    						 currentNode.texture=whypernym;
 			    				 }			    				 
 			    			}					   
 		    			 }
@@ -348,7 +366,7 @@ public class TaggerAndParser {
 	    				 //logic to find parent name
 	    				 for(int y=x+1;y<firstMentionWords.length;y++){
 	    					 if(Arrays.asList(objects).contains(firstMentionWords[y])||Arrays.asList(pronouns).contains(firstMentionWords[y])){
-	    	    				 String currentParentId=getObjectIdByName(firstMentionWords[y]);
+	    	    				 String currentParentId=getObjectIdByNameAndSentence(firstMentionWords[y],fMentionSentence);
 	    	    				 if(!currentParentId.equals("")){
 	    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
 	    		    				 currentNode.parent=currentParent; 
@@ -358,7 +376,7 @@ public class TaggerAndParser {
 				  				 //Check synonyms
 			    				 String wsynonym =getSynonyms(dict,firstMentionWords[y],"object");
 			    				 if(!wsynonym.equals("")){
-		    	    				 String currentParentId=getObjectIdByName(wsynonym);
+		    	    				 String currentParentId=getObjectIdByNameAndSentence(wsynonym,fMentionSentence);
 		    	    				 if(!currentParentId.equals("")){
 		    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
 		    		    				 currentNode.parent=currentParent; 
@@ -368,7 +386,7 @@ public class TaggerAndParser {
 			    					 //Check Hypernyms 
 			    					 String whypernym=getHypernyms(dict,firstMentionWords[y],"object");
 			    					 if(!whypernym.equals("")){
-			    	    				 String currentParentId=getObjectIdByName(whypernym);
+			    	    				 String currentParentId=getObjectIdByNameAndSentence(whypernym,fMentionSentence);
 			    	    				 if(!currentParentId.equals("")){
 			    	    					 VRMLNode currentParent=objectMap.get(currentParentId);	    	    					 
 			    		    				 currentNode.parent=currentParent; 
@@ -467,7 +485,6 @@ public class TaggerAndParser {
 				   String objectId1;
 				   String objectId2;
 				   
-				  //Identifying colour
 				   if(dependencyType.equals("amod")||dependencyType.equals("compound")||dependencyType.equals("acl:relcl")){
 					   
 					   //identifying room colour 
@@ -521,6 +538,33 @@ public class TaggerAndParser {
 										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
 										   modifiedNode=objectMap.get(objectId1);
 										   modifiedNode.colour=hypernym;
+										   objectMap.put(objectId1, modifiedNode);
+				    				 }			    				 
+				    			}
+						   }
+						   
+						   //Identifying the texture of the object
+						   if(Arrays.asList(textures).contains(word2Name)){
+							   //modifiedNode=objectMap.get(word1Name);
+							   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+							   modifiedNode=objectMap.get(objectId1);
+							   modifiedNode.texture=word2Name;
+							   objectMap.put(objectId1, modifiedNode);							   
+						   }else{
+				  				 //Check synonyms
+			    				 String synonym =getSynonyms(dict,word2Name,"texture");
+			    				 if(!synonym.equals("")){
+									   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+									   modifiedNode=objectMap.get(objectId1);
+									   modifiedNode.texture=synonym;
+									   objectMap.put(objectId1, modifiedNode);
+				    			}else{
+			    					 //Check Hypernyms 
+			    					 String hypernym=getHypernyms(dict,word2Name,"texture");
+			    					 if(!hypernym.equals("")){
+										   objectId1=getObjectIdByNameAndSentence(word1Name,sentenceNumber);
+										   modifiedNode=objectMap.get(objectId1);
+										   modifiedNode.texture=hypernym;
 										   objectMap.put(objectId1, modifiedNode);
 				    				 }			    				 
 				    			}
@@ -1558,10 +1602,11 @@ public class TaggerAndParser {
 			    } 			    
 			    tree.nodes.add(value);
 			    
-			    System.out.println("Printing VRML node details");
+			    System.out.println("Printing VRML node details in Tagger");
 			    System.out.println(value.id);
 			    System.out.println(value.name);
 			    System.out.println(value.colour);
+			    System.out.println(value.texture);
 			    System.out.println(value.count);
 			    
 			}
@@ -1656,6 +1701,27 @@ public class TaggerAndParser {
 				//System .out . println (w. getLemma ());
 				if(Arrays.asList(colours).contains(w.getLemma())){
 					System.out.println("Synonym for colour present!");
+					synonymName=w.getLemma();
+					break;
+				}
+			}
+			}
+		}
+		
+		//Get synonym of textures
+		else if(wordType.equals("texture")){
+			// look up first sense of the word 
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// iterate over words associated with the synset
+			for( IWord w : synset . getWords ()){
+				//System .out . println (w. getLemma ());
+				if(Arrays.asList(textures).contains(w.getLemma())){
+					System.out.println("Synonym for texture present!");
 					synonymName=w.getLemma();
 					break;
 				}
@@ -1762,6 +1828,34 @@ public class TaggerAndParser {
 						String currentWord = i. next (). getLemma ();
 						if(Arrays.asList(colours).contains(currentWord)){
 							System.out.println("Hypernym of colour present!");
+							hypernymName=currentWord;
+							break;
+						}
+					 }
+				}
+			}
+		}
+		
+		//Get hypernym of colour
+		else if( wordType.equals("texture")){
+			// get the synset
+			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
+			if((!(idxWord==null))&&(idxWord . getWordIDs ().size()>0)){
+			IWordID wordID = idxWord . getWordIDs ().get (0) ; // 1st meaning
+			IWord word = dict . getWord ( wordID );
+			ISynset synset = word . getSynset ();
+			
+			// get the hypernyms
+			List<ISynsetID> hypernyms =synset . getRelatedSynsets ( Pointer . HYPERNYM );
+			
+			// print out each h y p e r n y m s id and synonyms
+			List <IWord> words ;
+				for( ISynsetID sid : hypernyms ){
+				words = dict . getSynset (sid). getWords ();
+					for( Iterator<IWord> i = words . iterator (); i. hasNext () ;){
+						String currentWord = i. next (). getLemma ();
+						if(Arrays.asList(textures).contains(currentWord)){
+							System.out.println("Hypernym of texture present!");
 							hypernymName=currentWord;
 							break;
 						}

@@ -5,9 +5,10 @@ public class CodeGenerator {
 	//ObjectIdentifier objectIdentifier= new ObjectIdentifier();
 	
 	//Basic shapes
-	public String drawBox(String colour, String size, String parentCordinates, String relativeLocation, String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawBox(String colour, String texture, String size, String parentCordinates, String relativeLocation, String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
+		attributes.initializeTextures();
 		attributes.initializeOrientations("box");
 		attributes.initializeSizes("box");
 		
@@ -22,6 +23,11 @@ public class CodeGenerator {
 			cordinates="0.0 0.615 0.0";
 		}
 		
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+			textureCode=attributes.textureTable.get(texture);
+		}
+		
 		//PrintWriter writer = new PrintWriter("new5.wrl", "UTF-8");
 		//writer.println("#VRML V2.0 utf8");
 		
@@ -34,8 +40,9 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+
+				textureCode+ 
+			    " }"+
 			    "geometry Box {"+
 			    attributes.sizeTable.get(size)+
 			    "}"+
@@ -47,7 +54,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSphere(String colour, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawSphere(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("sphere");
@@ -63,6 +70,13 @@ public class CodeGenerator {
 			cordinates="0.0 0.615 0.0";
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
+		
 		ObjectIdentifier.writer.println("#Sphere");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
@@ -72,8 +86,9 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+
+				textureCode+
+			    " }"+
 			    "geometry Sphere {"+
 			    attributes.sizeTable.get(size)+
 			    "}"+
@@ -85,7 +100,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCylinder(String colour, String size,String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawCylinder(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("cylinder");
@@ -99,6 +114,13 @@ public class CodeGenerator {
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape,size);
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
+		
 		ObjectIdentifier.writer.println("#Cylinder");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
@@ -108,8 +130,8 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+textureCode+
+			    " } "+
 			    "geometry Cylinder {"+
 			    attributes.sizeTable.get(size)
 			    +
@@ -121,7 +143,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCone(String colour, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawCone(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("cone");
@@ -133,6 +155,13 @@ public class CodeGenerator {
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape,size);
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
+		
 		ObjectIdentifier.writer.println("#Cone");
 		ObjectIdentifier.writer.println("Transform {"+
 			"translation "+ cordinates+ //0.0 0.615 0.0
@@ -142,8 +171,8 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+textureCode+
+			    " } "+
 			    "geometry Cone {"+
 			    attributes.sizeTable.get(size)
 			    +
@@ -163,7 +192,7 @@ public class CodeGenerator {
 	//Relative location defines the position, left, right etc.
 	
 	//Object Round Table
-	public String drawRoundTable(String colour, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawRoundTable(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("table");
@@ -175,6 +204,13 @@ public class CodeGenerator {
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates,parentShape);
 		}
+		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
 		
 		ObjectIdentifier.writer.println("#Round Table");
 		ObjectIdentifier.writer.println("Transform { "+
@@ -188,8 +224,8 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+textureCode+
+			    " } "+
 			    "geometry Cylinder {"+
 				"radius 0.7"+
 				"height 0.03"+
@@ -230,7 +266,7 @@ public class CodeGenerator {
 	}
 	
 	//Object Square Table
-	public String drawSquareTable(String colour, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawSquareTable(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("table");
@@ -242,6 +278,13 @@ public class CodeGenerator {
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates,parentShape);
 		}
+		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
 		
 		ObjectIdentifier.writer.println("#Square Table");
 		ObjectIdentifier.writer.println("Transform { "+
@@ -255,8 +298,8 @@ public class CodeGenerator {
 			    "appearance DEF " +colour+ " Appearance {"+
 				"material Material {"+
 				    "diffuseColor "+attributes.colourTable.get(colour)+
-				" }"+
-			    "}"+
+				" } "+textureCode+
+			    " } "+
 			    "geometry Box {"+
 			    " size 1.0 0.1 1.0 "+
 			    "}"+
@@ -310,7 +353,7 @@ public class CodeGenerator {
 	}
 	
 	//Object Chair
-	public String drawChair(String colour, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawChair(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("chair");
@@ -323,6 +366,13 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates,parentShape);
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+			if(!texture.equals(null)){
+				textureCode=attributes.textureTable.get(texture);
+			}
+			
 		ObjectIdentifier.writer.println("#Chair");
 		ObjectIdentifier.writer.println("Transform { "+
 				"translation "+cordinates+
@@ -335,7 +385,8 @@ public class CodeGenerator {
 					    "appearance DEF "+colour+ " Appearance { "+
 						"material Material { "+
 						    "diffuseColor "+attributes.colourTable.get(colour)+
-						" }}"+
+						" } "+textureCode
+						+ " } "+
 					    "geometry Box {"+
 						"size 0.39 0.03 0.41 "+
 					    "}}]}"+
@@ -403,7 +454,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSofa(String colour, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawSofa(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("sofa");
@@ -415,6 +466,13 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates,parentShape);
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+			if(!(texture==null)&&!(texture.equals(""))){
+				textureCode=attributes.textureTable.get(texture);
+			}
+			
 		ObjectIdentifier.writer.println("#Sofa");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
@@ -424,7 +482,8 @@ public class CodeGenerator {
 		            "appearance DEF "+colour+" Appearance { "+
 		                "material Material { "+
 		                "diffuseColor "+attributes.colourTable.get(colour)+
-		                " } } "+
+		                " } "+textureCode+
+		                " } "+
 		            "geometry Box { "+
 		                "size 1.5  0.35  0.75"+
 		            " } } "+
@@ -564,7 +623,7 @@ public class CodeGenerator {
 		 return cordinates; //Return the location where the object is drawn
 	}
 	
-	public String drawBed(String colour, String size, String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawBed(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("bed");
@@ -579,6 +638,13 @@ public class CodeGenerator {
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates,parentShape);
 		}
 		
+		attributes.initializeTextures();
+
+		String textureCode="";
+		if(!(texture==null)&&!(texture.equals(""))){
+			textureCode=attributes.textureTable.get(texture);
+		}
+			
 		ObjectIdentifier.writer.println("#Bed");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
@@ -607,8 +673,8 @@ public class CodeGenerator {
 	    "appearance DEF " +"brown"+ " Appearance {"+
 		"material Material {"+
 		    "diffuseColor "+attributes.colourTable.get("brown")+
-		" }"+
-	    "}"+
+		" } "+textureCode+
+	    " } "+
 	    "geometry Box {"+
 	    " size 1.0 0.4 0.1 "+
 	    "}"+

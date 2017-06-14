@@ -69,10 +69,11 @@ public class ObjectIdentifier {
 	
 	public void defineObjectRecursive(VRMLNode node) throws IOException{
 		System.out.println("");
-	    System.out.println("Printing Object Details");
+	    System.out.println("Printing Object Details in Object Identifier");
 	    System.out.println("ID: "+node.id);
 	    System.out.println("name: "+node.name);
 	    System.out.println("colour: "+node.colour);
+	    System.out.println("texture: "+node.texture);
 	    System.out.println("type: "+node.type);
 	    System.out.println("size: "+node.size);
 	    System.out.println("orientation: "+node.orientation);
@@ -87,18 +88,30 @@ public class ObjectIdentifier {
 	    System.out.println("parent cordinates: "+node.parent.cordinates);
 	    }
 	    
-		String colour ="brown";
+		String colour ="";
+		String texture="";
 		String size ="regular";
 		String orientation ="front";
 		String parentShape="";
 		String parentCordinates="";
 		String relativeLocation="";
 	    
-		//setting colour
-		if((!(node.colour==null))){
+		//setting colour and texture
+		if(!(node.colour==null)){
 			colour=node.colour;
+		}else{//Setting default colours
+			if(node.name.equals("table")||node.name.equals("chair")||node.name.equals("sofa")){
+				colour="brown";
+			}else{
+				colour="blue";
+			}
+			
 		}
 		
+		if(!(node.texture==null)){
+			texture=node.texture;
+		}
+				
 		//setting size
 		if((!(node.size==null))){
 			size=node.size;
@@ -144,7 +157,11 @@ public class ObjectIdentifier {
 			}else{
 				parentCordinates=currentCordinates;
 				parentShape=currentShape;
-				relativeLocation="right";
+				if(node.name.equals("lamp")){
+					relativeLocation="on";
+				}else{
+					relativeLocation="right";
+				}
 			} 
 			
 		}
@@ -169,11 +186,11 @@ public class ObjectIdentifier {
 			System.out.println("Object box present");
 			for(int k=1;k<=node.count;k++){
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawBox(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawBox(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="box";
 				}else{
-					currentCordinates=codeGenerator.drawBox(colour,size,currentCordinates,"right","box",orientation,k);
+					currentCordinates=codeGenerator.drawBox(colour,texture,size,currentCordinates,"right","box",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="box";
 				}
@@ -186,11 +203,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawSphere(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSphere(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
 				}else{
-					currentCordinates=codeGenerator.drawSphere(colour,size,currentCordinates,"right","sphere",orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,size,currentCordinates,"right","sphere",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
 				}
@@ -201,11 +218,11 @@ public class ObjectIdentifier {
 			System.out.println("Object ball present");
 			for(int k=1;k<=node.count;k++){
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSphere(colour,"small",parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
 				}else{
-					currentCordinates=codeGenerator.drawSphere(colour,"small",currentCordinates,"right","sphere",orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",currentCordinates,"right","sphere",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
 				}
@@ -218,11 +235,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawCone(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawCone(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawCone(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cone";
 				}else{
-					currentCordinates=codeGenerator.drawCone(colour,size,currentCordinates,"right","cone",orientation,k);
+					currentCordinates=codeGenerator.drawCone(colour,texture,size,currentCordinates,"right","cone",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cone";
 				}
@@ -234,11 +251,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawCylinder(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawCylinder(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cylinder";
 				}else{
-					currentCordinates=codeGenerator.drawCylinder(colour,size,currentCordinates,"right","cylinder",orientation,k);
+					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,currentCordinates,"right","cylinder",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cylinder";
 				}
@@ -248,18 +265,18 @@ public class ObjectIdentifier {
 		//Custom objects
 		
 		//Draw Table
-		else if(!node.name.equals(null)&& (node.name).equalsIgnoreCase("table")){
+		else if(!(node.name==null)&& (node.name).equalsIgnoreCase("table")){
 			if((!(node.type==null)) && (node.type.equals("round")||node.type.equals("coffee"))){
 				System.out.println("Round table present");
 				for(int k=1;k<=node.count;k++){
 /*					currentCordinates=codeGenerator.drawRoundTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawRoundTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}else{
-						currentCordinates=codeGenerator.drawRoundTable(colour,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}
@@ -270,11 +287,11 @@ public class ObjectIdentifier {
 /*					currentCordinates=codeGenerator.drawSquareTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawSquareTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}else{
-						currentCordinates=codeGenerator.drawSquareTable(colour,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}
@@ -285,11 +302,11 @@ public class ObjectIdentifier {
 /*					currentCordinates=codeGenerator.drawRoundTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawSquareTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}else{
-						currentCordinates=codeGenerator.drawSquareTable(colour,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
 					}
@@ -303,11 +320,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawChair(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawChair(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawChair(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="chair";
 				}else{
-					currentCordinates=codeGenerator.drawChair(colour,size,currentCordinates,"right","chair",orientation,k);
+					currentCordinates=codeGenerator.drawChair(colour,texture,size,currentCordinates,"right","chair",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="chair";
 				}
@@ -321,11 +338,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawSofa(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSofa(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSofa(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sofa";
 				}else{
-					currentCordinates=codeGenerator.drawSofa(colour,size,currentCordinates,"right","sofa",orientation,k);
+					currentCordinates=codeGenerator.drawSofa(colour,texture,size,currentCordinates,"right","sofa",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sofa";
 				}
@@ -340,7 +357,7 @@ public class ObjectIdentifier {
 		}*/
 		
 		//Draw Lamp
-		else if(!node.name.equals(null)&& (node.name).equalsIgnoreCase("lamp")){
+		else if(!(node.name==null)&& (node.name).equalsIgnoreCase("lamp")){
 			if((!(node.type==null)) && node.type.equals("ceiling")){
 				System.out.println("Ceiling lamp present");
 				codeGenerator.drawCeilingLamp();
@@ -384,11 +401,11 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawBed(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawBed(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawBed(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="bed";
 				}else{
-					currentCordinates=codeGenerator.drawBed(colour,size,currentCordinates,"right","bed",orientation,k);
+					currentCordinates=codeGenerator.drawBed(colour,texture,size,currentCordinates,"right","bed",orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="bed";
 				}
