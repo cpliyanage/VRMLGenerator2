@@ -11,8 +11,11 @@ import javax.swing.JButton;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+
 import javax.swing.ImageIcon;
 
 
@@ -91,8 +94,18 @@ public class Interface {
 		frame.getContentPane().add(lblOutput);
 		
 		final JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setBounds(30, 209, 356, 41);
+		lblNewLabel.setBounds(30, 209, 283, 41);
 		frame.getContentPane().add(lblNewLabel);
+		
+		JButton btnNewButton = new JButton("Upload");
+		btnNewButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				FileUpload.uploadFile();
+			}
+		});
+		btnNewButton.setBounds(323, 216, 89, 23);
+		frame.getContentPane().add(btnNewButton);
 		
 		btnGenerateVrml.addMouseListener(new MouseAdapter() {
 			@Override
@@ -102,12 +115,24 @@ public class Interface {
 				try {
 					String output=taggerAndParser.tagContent(input);
 					lblNewLabel.setText(output);
-					//Opening the file in browser
+					
+				/*	//Opening the file in browser
 					String url="generated.wrl";
 					File vrmlFile = new File(url);
-					Desktop.getDesktop().browse(vrmlFile.toURI());
+					Desktop.getDesktop().browse(vrmlFile.toURI()); */
+					
+					//opening file with bs contact
+					try
+					{
+					    Process p = Runtime.getRuntime().exec("C:/Users/Dell/AppData/Local/Bitmanagement Software/BS Contact/x64/BSContact.exe D:/Eclipse-Neon-Workspace/VRMLGenerator2/generated.wrl");
+					    BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+					    stdInput.close();
+					}
+					catch(Exception k)
+					{
+					    k.printStackTrace();
+					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
