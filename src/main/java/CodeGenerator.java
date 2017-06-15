@@ -369,7 +369,7 @@ public class CodeGenerator {
 		attributes.initializeTextures();
 
 		String textureCode="";
-			if(!texture.equals(null)){
+		if(!(texture==null)&&!(texture.equals(""))){
 				textureCode=attributes.textureTable.get(texture);
 			}
 			
