@@ -310,7 +310,7 @@ public class AttributeDefinitions {
 			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 				   
 				   if(parentShape.equals("table")){
-					   y1=y1+0.615+0.01;
+					   y1=y1+0.615+0.055;
 					   x1=x1-0.25;
 				   }
 				   else if(parentShape.equals("chair")){

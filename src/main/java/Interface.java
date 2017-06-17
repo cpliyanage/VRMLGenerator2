@@ -22,7 +22,7 @@ import javax.swing.ImageIcon;
 public class Interface {
 
 	private JFrame frame;
-	private JTextField textField;
+	private JTextArea textField;
 	
 	//POSTagger posTagger = new POSTagger();
 	TaggerAndParser taggerAndParser = new TaggerAndParser();
@@ -66,7 +66,8 @@ public class Interface {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		textField = new JTextField();
+		textField = new JTextArea();
+		textField.setLineWrap(true);
 		textField.setBounds(30, 33, 379, 92);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);		
@@ -98,6 +99,7 @@ public class Interface {
 		frame.getContentPane().add(lblNewLabel);
 		
 		JButton btnNewButton = new JButton("Upload");
+		btnNewButton.setFont(new Font("Rockwell", Font.PLAIN, 14));
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
