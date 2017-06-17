@@ -16,6 +16,16 @@ public class AttributeDefinitions {
 	      colourTable.put("brown", "0.6 0.35 0.0");
 	      colourTable.put("black", "0.0 0.0 0.0");
 	      colourTable.put("white", "1.0 1.0 1.0");
+	      colourTable.put("yellow", "1.0 1.0 0.0");
+	      colourTable.put("purple", "0.627 0.125 0.941");
+	      colourTable.put("grey", "0.5 0.5 0.5");
+	      colourTable.put("orange", "1.0 0.647 0.0");
+	      colourTable.put("pink", "1.0 0.752 0.796");
+	      colourTable.put("beige", "0.96 0.96 0.862");
+	      colourTable.put("maroon", "0.5 0.0 0.0");
+	      colourTable.put("magenta", "1.0 0.0 1.0");
+	      colourTable.put("cream", "0.96 1.0 0.98");
+	      colourTable.put("peach", "1.0 0.85 0.72");
 	   }
 		
 		 // Create a hash map for colours   
@@ -56,21 +66,25 @@ public class AttributeDefinitions {
 		   if (shape.equalsIgnoreCase("box")){
 			   sizeTable.put("small", "size 0.2 0.2 0.2");
 			   sizeTable.put("regular", "size 0.4 0.4 0.4");
+			   sizeTable.put("medium", "size 0.4 0.4 0.4");
 			   sizeTable.put("large", "size 0.8 0.8 0.8");
 		   }
 		   if (shape.equalsIgnoreCase("sphere")){
 			   sizeTable.put("small", "radius 0.1");
 			   sizeTable.put("regular", "radius 0.2");
+			   sizeTable.put("medium", "radius 0.2");
 			   sizeTable.put("large", "radius 0.4");
 		   }
 		   if (shape.equalsIgnoreCase("cone")){
 			   sizeTable.put("small", " bottomRadius 0.1 "+ "height 0.25 "+ "side TRUE "+ "bottom TRUE ");
 			   sizeTable.put("regular", " bottomRadius 0.2 "+ "height 0.5 "+ "side TRUE "+ "bottom TRUE ");
+			   sizeTable.put("medium", " bottomRadius 0.2 "+ "height 0.5 "+ "side TRUE "+ "bottom TRUE ");
 			   sizeTable.put("large", " bottomRadius 0.4 "+ "height 1.0 "+ "side TRUE "+ "bottom TRUE ");
 		   }
 		   if (shape.equalsIgnoreCase("cylinder")){
 			   sizeTable.put("small", " radius 0.1 " + "height 0.25 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
 			   sizeTable.put("regular", " radius 0.2 " + "height 0.5 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
+			   sizeTable.put("medium", " radius 0.2 " + "height 0.5 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
 			   sizeTable.put("large", " radius 0.4 " + "height 1.0 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
 		   }
 		   
@@ -195,7 +209,7 @@ public class AttributeDefinitions {
 		   String newCordinates="";
 		   
 		   //Shape round table, square table and chair
-		   if(shape.equals("roundTable")||shape.equals("squareTable")||shape.equals("chair")||shape.equals("bed")){
+		   if(shape.equals("roundTable")||shape.equals("squareTable")||shape.equals("chair")){
 
 			   //Parent cordinates
 			   String arr1[]=parentCordinates.split(" ");
@@ -245,12 +259,6 @@ public class AttributeDefinitions {
 			   double x1 = Double.parseDouble(arr1[0]);
 			   double y1 = Double.parseDouble(arr1[1]);
 			   double z1 = Double.parseDouble(arr1[2]);
-			   
-			   //Current cordinates
-		/*	   String arr2[]=currentCordinates.split(" ");
-			   double x2 = Double.parseDouble(arr2[0]);
-			   double y2 = Double.parseDouble(arr2[1]);
-			   double z2 = Double.parseDouble(arr2[2]); */
 			   			   			   
 			   //old cordinates are the cordinates of the object relative to origin
 			   if(relativeLocation.equals("left")){
@@ -276,6 +284,43 @@ public class AttributeDefinitions {
 				   z1=z1-1.5;
 			   }			   
 			   newCordinates = x1+" "+y1+" "+z1;			   
+		   }
+		   
+		   //Shape bed
+		   else if(shape.equals("bed")){
+
+			   //Parent cordinates
+			   String arr1[]=parentCordinates.split(" ");
+			   double x1 = Double.parseDouble(arr1[0]);
+			   double y1 = Double.parseDouble(arr1[1]);
+			   double z1 = Double.parseDouble(arr1[2]);
+			   
+			   //old cordinates are the cordinates of the object relative to origin
+			   if(relativeLocation.equals("left")){
+				   x1=x1-1.5;
+			   }
+			   else if(relativeLocation.equals("right")){
+				   x1=x1+1.5;
+			   }
+			   else if(relativeLocation.equals("above")){
+				   y1=y1+1.5;
+			   }
+			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
+				   //y1=y1-1.5;
+				   x1=x1+0.25;
+			   }
+			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
+				   y1=y1+0.2;
+			   }
+			   else if(relativeLocation.equals("front")){
+				   z1=z1+2;
+			   }
+			   else if(relativeLocation.equals("behind")){
+				   z1=z1-2;
+			   }
+			   
+			   newCordinates = x1+" "+y1+" "+z1;
+			   
 		   }
 		   
 		   //Shape table lamp

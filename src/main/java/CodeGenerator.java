@@ -5,7 +5,7 @@ public class CodeGenerator {
 	//ObjectIdentifier objectIdentifier= new ObjectIdentifier();
 	
 	//Basic shapes
-	public String drawBox(String colour, String texture, String size, String parentCordinates, String relativeLocation, String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawBox(String colour, String texture, String size, String parentCordinates, String relativeLocation, String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeTextures();
@@ -19,6 +19,8 @@ public class CodeGenerator {
 		//If parent cordinates and relative location are defined
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"box",parentShape,size);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}else{
 			cordinates="0.0 0.615 0.0";
 		}
@@ -54,7 +56,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSphere(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawSphere(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("sphere");
@@ -66,6 +68,8 @@ public class CodeGenerator {
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"sphere",parentShape,size);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}else{
 			cordinates="0.0 0.615 0.0";
 		}
@@ -100,7 +104,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCylinder(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawCylinder(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape, String absoluteCordinates,String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("cylinder");
@@ -112,6 +116,8 @@ public class CodeGenerator {
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cylinder",parentShape,size);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -143,7 +149,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawCone(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawCone(String colour, String texture, String size,String parentCordinates, String relativeLocation,String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("cone");
@@ -153,6 +159,8 @@ public class CodeGenerator {
 		String cordinates="0.0 0.615 0.0";
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocation(parentCordinates, relativeLocation,"cone",parentShape,size);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -192,7 +200,7 @@ public class CodeGenerator {
 	//Relative location defines the position, left, right etc.
 	
 	//Object Round Table
-	public String drawRoundTable(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawRoundTable(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("table");
@@ -203,6 +211,8 @@ public class CodeGenerator {
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates,parentShape);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -266,7 +276,7 @@ public class CodeGenerator {
 	}
 	
 	//Object Square Table
-	public String drawSquareTable(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawSquareTable(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape, String absoluteCordinates,String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("table");
@@ -277,6 +287,8 @@ public class CodeGenerator {
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates,parentShape);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -353,7 +365,7 @@ public class CodeGenerator {
 	}
 	
 	//Object Chair
-	public String drawChair(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawChair(String colour, String texture, String size, String parentCordinates,String relativeLocation,String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("chair");
@@ -364,6 +376,8 @@ public class CodeGenerator {
 
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates,parentShape);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -454,7 +468,7 @@ public class CodeGenerator {
 		 return cordinates;
 	}
 	
-	public String drawSofa(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape, String orientation,int objectNum) throws IOException{
+	public String drawSofa(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape,String absoluteCordinates, String orientation,int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("sofa");
@@ -464,6 +478,8 @@ public class CodeGenerator {
 		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates,parentShape);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();
@@ -623,7 +639,7 @@ public class CodeGenerator {
 		 return cordinates; //Return the location where the object is drawn
 	}
 	
-	public String drawBed(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape,String orientation, int objectNum) throws IOException{
+	public String drawBed(String colour, String texture, String size, String parentCordinates, String relativeLocation,String parentShape,String absoluteCordinates,String orientation, int objectNum) throws IOException{
 		AttributeDefinitions attributes= new AttributeDefinitions();
 		attributes.initializeColours();
 		attributes.initializeOrientations("bed");
@@ -636,6 +652,8 @@ public class CodeGenerator {
 		//check whether relative location is given
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates,parentShape);
+		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
+			cordinates=absoluteCordinates;
 		}
 		
 		attributes.initializeTextures();

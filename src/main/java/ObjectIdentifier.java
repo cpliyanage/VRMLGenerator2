@@ -21,7 +21,16 @@ public class ObjectIdentifier {
 	String[] relativeLocations={"left","right","above","below","front","behind","top", "under","on", "next"};
 	String[] roomLocations={"middle", "leftCorner", "rightCorner"};
 	
+	boolean isFirstObject=true;
+	boolean objectInMiddle=false;
+	boolean objectInLeft=false;
+	boolean objectInRight=false;
+	
 	public void defineObject(Tree tree) throws IOException{
+		isFirstObject=true;
+		objectInMiddle=false;
+		objectInLeft=false;
+		objectInRight=false;
 		writer= new PrintWriter("generated.wrl");
 		writer.println("#VRML V2.0 utf8");
 		
@@ -95,9 +104,10 @@ public class ObjectIdentifier {
 		String parentShape="";
 		String parentCordinates="";
 		String relativeLocation="";
+		String absoluteCordinates="";
 	    
 		//setting colour and texture
-		if(!(node.colour==null)){
+		if(!(node.colour==null)&&!(node.colour.equals(""))){
 			colour=node.colour;
 		}else{//Setting default colours
 			if(node.name.equals("table")||node.name.equals("chair")||node.name.equals("sofa")){
@@ -108,52 +118,90 @@ public class ObjectIdentifier {
 			
 		}
 		
-		if(!(node.texture==null)){
+		if(!(node.texture==null)&&!(node.texture.equals(""))){
 			texture=node.texture;
 		}
 				
 		//setting size
-		if((!(node.size==null))){
+		if((!(node.size==null))&&(!(node.size.equals("")))){
 			size=node.size;
 		}
 		
 		//setting orientation
-		if((!(node.orientation==null))){
+		if((!(node.orientation==null))&&(!(node.orientation.equals("")))){
 			orientation=node.orientation;
 		}
 		
-		//If the parent is not defined, the parent is set as the room node by default
+		//If the parent is not defined, the parent is set as the room node by default in tagger and parser
 		
-		//Setting location relative to room (for first object) 
-		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(node.parent.name.equals("room"))&&(node.id.equals("object1"))){
-			if((!(node.location==null))&&(!(node.location.equals("")))){
+		//Setting location relative to room (for first object) 		
+		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(node.parent.name.equals("room"))&&(isFirstObject)){	
+			if((!(node.location==null))&&(!(node.location.equals("")))){//if location is defined
 				if(Arrays.asList(roomLocations).contains(node.location)){
 					relativeLocation=node.location; //location can be middle, right corner, left corner
 				}else if(node.location.equals("left")){
 					relativeLocation="leftCorner";
-				}else if(node.location.equals("left")){
+				}else if(node.location.equals("right")){
 					relativeLocation="rightCorner";
 				}else{
-					relativeLocation="middle";
+					relativeLocation="middle"; // If location is not mentioned above (ex: location is above, behind,front, under,below)
 				}				
-			}else{
+			}else{ //if location is not defined 
 				relativeLocation="middle";
 			} 
 			
 		}
 		
+		//Setting cordinates relative to room (for first object)
+		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(node.parent.name.equals("room"))&&(isFirstObject)){	
+			if(relativeLocation.equals("middle")){
+				
+			}else if(relativeLocation.equals("middle")){
+				absoluteCordinates=roomMiddle;
+				objectInMiddle=true;
+			}else if(relativeLocation.equals("leftCorner")){
+				absoluteCordinates=roomLeftCorner;
+				objectInLeft=true;
+			}else if(relativeLocation.equals("rightCorner")){
+				absoluteCordinates=roomRightCorner;
+				objectInRight=true;
+			}else{
+				absoluteCordinates=roomMiddle;
+				objectInMiddle=true;
+			}
+		}
+		
+		
 		//Setting location relative to room (except for first object)
-		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(node.parent.name.equals("room"))&&!(node.id.equals("object1"))){
-			if((!(node.location==null))&&(!(node.location.equals("")))){
+		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(node.parent.name.equals("room"))&&(!isFirstObject)){
+			if((!(node.location==null))&&(!(node.location.equals("")))){ //If only the location is defined
 				if(Arrays.asList(roomLocations).contains(node.location)){
 					relativeLocation=node.location; //location can be middle, right corner, left corner
-				}else if(node.location.equals("left")){
-					relativeLocation="leftCorner";
-				}else if(node.location.equals("left")){
-					relativeLocation="rightCorner";
+					if(node.location.equals("middle")&&!objectInMiddle){
+						absoluteCordinates=roomMiddle;
+						objectInMiddle=true;
+					}
+					else if(node.location.equals("leftCorner")&&!objectInLeft){
+						absoluteCordinates=roomLeftCorner;
+						objectInLeft=true;
+					}
+					else if(node.location.equals("rightCorner")&&!objectInRight){
+						absoluteCordinates=roomRightCorner;
+						objectInRight=true;
+					}else{
+						parentCordinates=currentCordinates;
+						parentShape=currentShape;
+						if(node.name.equals("lamp")){
+							relativeLocation="on";
+						}else{
+							relativeLocation="right";
+						}
+					}
 				}else{
-					relativeLocation="middle";
-				}				
+					parentCordinates=currentCordinates;
+					parentShape=currentShape;
+					relativeLocation=node.location;
+				}
 			}else{
 				parentCordinates=currentCordinates;
 				parentShape=currentShape;
@@ -166,17 +214,18 @@ public class ObjectIdentifier {
 			
 		}
 		
-		//setting parent cordinates (No cordinates are set for room node)
-		if((!(node.parent==null))&&(!(node.parent.cordinates==null))&&(!(node.parent.cordinates==""))){
+		//setting parent cordinates when parent is not room (No cordinates are set for room node since parent is null)
+		if((!(node.parent==null))&&(!(node.parent.equals("")))&&(!(node.parent.cordinates==null))&&(!(node.parent.cordinates.equals("")))&&!(node.parent.name.equals("room"))){
 			parentCordinates=node.parent.cordinates;
 		}
 		
+		
 		//setting parent shape (except for room node)
-		if((!(node.parent==null))&&(!(node.parent.name==null))&&(!(node.parent.name==""))&&(!(node.parent.name.equals("room")))){
+		if((!(node.parent==null))&&(!(node.parent.equals("")))&&(!(node.parent.name==null))&&(!(node.parent.name.equals("")))&&(!(node.parent.name.equals("room")))){
 			parentShape=node.parent.name;
 		}
 		//setting relative location
-		if((!(node.location==null))){
+		if((!(node.parent==null))&&(!(node.parent.equals("")))&&(!(node.location==null))&&(!(node.location.equals("")))&&(!(node.parent.name.equals("room")))){
 			relativeLocation=node.location;
 		}
 			
@@ -185,14 +234,22 @@ public class ObjectIdentifier {
 		if ((!(node.name==null)) && (node.name).equalsIgnoreCase("box")){
 			System.out.println("Object box present");
 			for(int k=1;k<=node.count;k++){
-				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawBox(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+				if(k==1){//FirstObject					
+					String drawnCordinates=codeGenerator.drawBox(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
-					currentShape="box";
+					if(!(relativeLocation.equals("on"))){
+						currentShape="box";
+						currentCordinates=drawnCordinates;
+					}
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawBox(colour,texture,size,currentCordinates,"right","box",orientation,k);
+					String drawnCordinates=codeGenerator.drawBox(colour,texture,size,currentCordinates,"right","box",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
-					currentShape="box";
+					if(!(relativeLocation.equals("on"))){
+						currentShape="box";
+						currentCordinates=drawnCordinates;
+					}
+					isFirstObject=false;
 				}
 			}
 			
@@ -203,13 +260,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawSphere(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSphere(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawSphere(colour,texture,size,currentCordinates,"right","sphere",orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,size,currentCordinates,"right","sphere",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
+					isFirstObject=false;
 				}
 			}
 			
@@ -218,13 +277,15 @@ public class ObjectIdentifier {
 			System.out.println("Object ball present");
 			for(int k=1;k<=node.count;k++){
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",currentCordinates,"right","sphere",orientation,k);
+					currentCordinates=codeGenerator.drawSphere(colour,texture,"small",currentCordinates,"right","sphere",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sphere";
+					isFirstObject=false;
 				}
 			}
 			
@@ -235,13 +296,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawCone(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawCone(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawCone(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cone";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawCone(colour,texture,size,currentCordinates,"right","cone",orientation,k);
-					node.setCordinates(currentCordinates);
+					currentCordinates=codeGenerator.drawCone(colour,texture,size,currentCordinates,"right","cone",absoluteCordinates,orientation,k);
+					node.setCordinates(currentCordinates);					
 					currentShape="cone";
+					isFirstObject=false;
 				}
 			}
 		}
@@ -251,13 +314,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawCylinder(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cylinder";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,currentCordinates,"right","cylinder",orientation,k);
+					currentCordinates=codeGenerator.drawCylinder(colour,texture,size,currentCordinates,"right","cylinder",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="cylinder";
+					isFirstObject=false;
 				}
 			}
 		}
@@ -272,13 +337,15 @@ public class ObjectIdentifier {
 /*					currentCordinates=codeGenerator.drawRoundTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}else{
-						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawRoundTable(colour,texture,size,currentCordinates,"right","table",absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}
 				}
 			}else if((!(node.type==null)) && node.type.equals("square")){
@@ -287,13 +354,15 @@ public class ObjectIdentifier {
 /*					currentCordinates=codeGenerator.drawSquareTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}else{
-						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}
 				}
 			}else{
@@ -302,13 +371,15 @@ public class ObjectIdentifier {
 /*					currentCordinates=codeGenerator.drawRoundTable(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 					node.setCordinates(currentCordinates);*/
 					if(k==1){//FirstObject
-						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}else{
-						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",orientation,k);
+						currentCordinates=codeGenerator.drawSquareTable(colour,texture,size,currentCordinates,"right","table",absoluteCordinates,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="table";
+						isFirstObject=false;
 					}
 				}
 			}
@@ -320,13 +391,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawChair(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawChair(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawChair(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="chair";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawChair(colour,texture,size,currentCordinates,"right","chair",orientation,k);
+					currentCordinates=codeGenerator.drawChair(colour,texture,size,currentCordinates,"right","chair",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="chair";
+					isFirstObject=false;
 				}
 			}
 		}
@@ -338,13 +411,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawSofa(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawSofa(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawSofa(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sofa";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawSofa(colour,texture,size,currentCordinates,"right","sofa",orientation,k);
+					currentCordinates=codeGenerator.drawSofa(colour,texture,size,currentCordinates,"right","sofa",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="sofa";
+					isFirstObject=false;
 				}
 			}
 		}
@@ -370,10 +445,12 @@ public class ObjectIdentifier {
 						currentCordinates=codeGenerator.drawTableLamp(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="lamp";
+						isFirstObject=false;
 					}else{
-						currentCordinates=codeGenerator.drawTableLamp(colour,size,currentCordinates,"right","lamp",orientation,k);
+						currentCordinates=codeGenerator.drawTableLamp(colour,size,currentCordinates,"on","lamp",orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="lamp";
+						isFirstObject=false;
 					}
 				}
 			}else{
@@ -385,10 +462,12 @@ public class ObjectIdentifier {
 						currentCordinates=codeGenerator.drawTableLamp(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="lamp";
+						isFirstObject=false;
 					}else{
-						currentCordinates=codeGenerator.drawTableLamp(colour,size,currentCordinates,"right","lamp",orientation,k);
+						currentCordinates=codeGenerator.drawTableLamp(colour,size,currentCordinates,"on","lamp",orientation,k);
 						node.setCordinates(currentCordinates);
 						currentShape="lamp";
+						isFirstObject=false;
 					}
 				}
 			}
@@ -401,13 +480,15 @@ public class ObjectIdentifier {
 /*				currentCordinates=codeGenerator.drawBed(colour,size,parentCordinates,relativeLocation,parentShape,orientation,k);
 				node.setCordinates(currentCordinates);*/
 				if(k==1){//FirstObject
-					currentCordinates=codeGenerator.drawBed(colour,texture,size,parentCordinates,relativeLocation,parentShape,orientation,k);
+					currentCordinates=codeGenerator.drawBed(colour,texture,size,parentCordinates,relativeLocation,parentShape,absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="bed";
+					isFirstObject=false;
 				}else{
-					currentCordinates=codeGenerator.drawBed(colour,texture,size,currentCordinates,"right","bed",orientation,k);
+					currentCordinates=codeGenerator.drawBed(colour,texture,size,currentCordinates,"right","bed",absoluteCordinates,orientation,k);
 					node.setCordinates(currentCordinates);
 					currentShape="bed";
+					isFirstObject=false;
 				}
 			}
 		}

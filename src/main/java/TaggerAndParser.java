@@ -41,12 +41,12 @@ public class TaggerAndParser {
 	int objectCount;
 	
 	String[] locations={"left","right","above","below","front","behind","top", "under","on", "next"};
-	String[] roomLocations={"middle", "corner"};
-	static String[] textures= {"wooden","wood","glass","metal","steel"};
-	String[] roomTextures= {"wooden","brick"};
+	String[] roomLocations={"middle", "corner"};	
+	String[] roomTextures= {"brick"};
 	String[] orientations= {"front","backward", "left", "right"};
 	String[] pronouns={"this","these","that","those","it"};
-	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "bookshelf", "lamp", "bed","ball"};
+	static String[] textures= {"wooden","wood","glass","metal","steel"};
+	static String[] objects = { "table", "chair", "box","cone","sphere", "cylinder", "sofa", "lamp", "bed","ball"};
 	static String[] colours= {"red", "green", "blue","brown","black", "white", "yellow", "purple", "grey", "orange", "pink", "beige", "maroon", "magenta", "cream", "peach"};
 	static String[] sizes = {"small","regular","medium", "large"};
 	static String[] types= {"round","square", "ceiling","coffee"};
@@ -658,7 +658,7 @@ public class TaggerAndParser {
 									   if(!(objectId1.equals(""))){
 										   modifiedNode=objectMap.get(objectId1);
 										   if(!(modifiedNode==null)){
-											   modifiedNode.colour=synonym;
+											   modifiedNode.type=synonym;
 											   objectMap.put(objectId1, modifiedNode);
 										   }
 									   }
@@ -777,7 +777,7 @@ public class TaggerAndParser {
 								   if(!(objectId1.equals(""))){
 									   modifiedNode=objectMap.get(objectId1);
 									   if(!(modifiedNode==null)){
-										   modifiedNode.colour=synonym;
+										   modifiedNode.type=synonym;
 										   objectMap.put(objectId1, modifiedNode);
 									   }
 								   }
@@ -2567,7 +2567,7 @@ public class TaggerAndParser {
 			}
 		}
 		
-		//Get hypernym of colour
+		//Get hypernym of texture
 		else if( wordType.equals("texture")){
 			// get the synset
 			IIndexWord idxWord = dict . getIndexWord (name, POS.ADJECTIVE );
