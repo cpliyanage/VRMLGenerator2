@@ -340,10 +340,10 @@ public class AttributeDefinitions {
 			   			   			   
 			   //old cordinates are the cordinates of the object relative to origin
 			   if(relativeLocation.equals("left")){
-				   x1=x1-1.5;
+				   x1=x1-0.3;
 			   }
 			   else if(relativeLocation.equals("right")){
-				   x1=x1+1.5;
+				   x1=x1+0.3;
 			   }
 			   else if(relativeLocation.equals("above")){
 				   y1=y1+1.5;
