@@ -25,7 +25,7 @@ public class Interface {
 	private JTextArea textField;
 	
 	//POSTagger posTagger = new POSTagger();
-	TaggerAndParser taggerAndParser = new TaggerAndParser();
+	TaggerAndParser2 taggerAndParser = new TaggerAndParser2();
 
 	/**
 	 * Launch the application.
@@ -62,13 +62,13 @@ public class Interface {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 481, 355);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		textField = new JTextArea();
 		textField.setLineWrap(true);
-		textField.setBounds(30, 33, 379, 92);
+		textField.setBounds(30, 75, 409, 81);
 		frame.getContentPane().add(textField);
 		textField.setColumns(10);		
 		
@@ -80,22 +80,22 @@ public class Interface {
 		JButton btnGenerateVrml = new JButton("Generate VRML");
 		btnGenerateVrml.setFont(new Font("Rockwell", Font.PLAIN, 14));
 		btnGenerateVrml.setIcon(new ImageIcon("C:\\Users\\Dell\\Desktop\\Mimetype-make-icon.png"));
-		btnGenerateVrml.setBounds(30, 136, 191, 50);
+		btnGenerateVrml.setBounds(30, 180, 191, 50);
 		frame.getContentPane().add(btnGenerateVrml);
 		
 		JButton btnClear = new JButton("Clear");
 		btnClear.setFont(new Font("Rockwell", Font.PLAIN, 14));
 		btnClear.setIcon(new ImageIcon("C:\\Users\\Dell\\Desktop\\Actions-edit-clear-icon.png"));
-		btnClear.setBounds(242, 136, 167, 50);
+		btnClear.setBounds(272, 180, 167, 50);
 		frame.getContentPane().add(btnClear);
 		
 		JLabel lblOutput = new JLabel("Output");
 		lblOutput.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblOutput.setBounds(30, 197, 66, 23);
+		lblOutput.setBounds(40, 241, 66, 23);
 		frame.getContentPane().add(lblOutput);
 		
 		final JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setBounds(30, 209, 283, 41);
+		lblNewLabel.setBounds(40, 265, 283, 41);
 		frame.getContentPane().add(lblNewLabel);
 		
 		JButton btnNewButton = new JButton("Upload");
@@ -106,8 +106,12 @@ public class Interface {
 				FileUpload.uploadFile();
 			}
 		});
-		btnNewButton.setBounds(323, 216, 89, 23);
+		btnNewButton.setBounds(350, 265, 89, 23);
 		frame.getContentPane().add(btnNewButton);
+		
+		JLabel lblNewLabel_1 = new JLabel("example : There is a brown table.  There is red chair right to the table.");
+		lblNewLabel_1.setBounds(30, 34, 409, 30);
+		frame.getContentPane().add(lblNewLabel_1);
 		
 		btnGenerateVrml.addMouseListener(new MouseAdapter() {
 			@Override

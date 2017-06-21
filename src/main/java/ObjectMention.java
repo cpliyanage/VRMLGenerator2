@@ -6,4 +6,5 @@ public class ObjectMention {
 	String colour="";
 	String size="";
 	String type="";
+	String texture="";
 	}

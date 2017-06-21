@@ -4,6 +4,7 @@ import java.util.Hashtable;
 public class AttributeDefinitions {
 
 	Hashtable<String, String> colourTable = new Hashtable<String, String>();
+	Hashtable<String, String> roomColourTable = new Hashtable<String, String>();
 	Hashtable<String, String> sizeTable = new Hashtable<String, String>();
 	Hashtable<String, String> orientationTable = new Hashtable<String, String>();
 	Hashtable<String, String> textureTable = new Hashtable<String, String>();
@@ -27,6 +28,25 @@ public class AttributeDefinitions {
 	      colourTable.put("cream", "0.96 1.0 0.98");
 	      colourTable.put("peach", "1.0 0.85 0.72");
 	   }
+		
+		public void initializeRoomColours() {
+			roomColourTable.put("red", "1.0 0.0 0.0");//
+			roomColourTable.put("green", "0.59 0.98 0.59");
+			roomColourTable.put("blue", "0.68 0.93 0.93");
+			roomColourTable.put("brown", "0.6 0.35 0.0");//
+			roomColourTable.put("black", "0.0 0.0 0.0");//
+			roomColourTable.put("white", "1.0 1.0 1.0");
+			roomColourTable.put("yellow", "0.93 0.86 0.5");
+			roomColourTable.put("purple", "0.627 0.125 0.941");
+			roomColourTable.put("grey", "0.5 0.5 0.5");
+			roomColourTable.put("orange", "1.0 0.647 0.0");//
+			roomColourTable.put("pink", "1.0 0.752 0.796");
+			roomColourTable.put("beige", "0.96 0.96 0.862");
+			roomColourTable.put("maroon", "0.5 0.0 0.0");//
+			roomColourTable.put("magenta", "1.0 0.0 1.0");//
+			roomColourTable.put("cream", "0.96 1.0 0.98");
+			roomColourTable.put("peach", "1.0 0.85 0.72");
+		   }
 		
 		 // Create a hash map for colours   
 			public void initializeTextures() {
@@ -67,7 +87,7 @@ public class AttributeDefinitions {
 			   sizeTable.put("small", "size 0.2 0.2 0.2");
 			   sizeTable.put("regular", "size 0.4 0.4 0.4");
 			   sizeTable.put("medium", "size 0.4 0.4 0.4");
-			   sizeTable.put("large", "size 0.8 0.8 0.8");
+			   sizeTable.put("large", "size 0.6 0.6 0.6");
 		   }
 		   if (shape.equalsIgnoreCase("sphere")){
 			   sizeTable.put("small", "radius 0.1");
@@ -88,17 +108,19 @@ public class AttributeDefinitions {
 			   sizeTable.put("large", " radius 0.4 " + "height 1.0 " + "side TRUE "+ "bottom TRUE " + "top TRUE ");
 		   }
 		   
-/*		   if (shape.equalsIgnoreCase("table")){
-			   sizeTable.put("small", "1.0 0.0 0.0");
-			   sizeTable.put("regular", "0.0 1.0 0.0");
-			   sizeTable.put("large", "0.0 0.0 1.0");
+		   if (shape.equalsIgnoreCase("table")||shape.equalsIgnoreCase("chair")||shape.equalsIgnoreCase("sofa")||shape.equalsIgnoreCase("bed")){
+			   sizeTable.put("small", "0.75 0.75 0.75");// x y z
+			   sizeTable.put("regular", "1.0 1.0 1.0");
+			   sizeTable.put("medium", "1.0 1.0 1.0");
+			   sizeTable.put("large", "1.25 1.25 1.25");
 		   }
 		   if (shape.equalsIgnoreCase("chair")){
-			   sizeTable.put("small", "1.0 0.0 0.0");
-			   sizeTable.put("regular", "0.0 1.0 0.0");
-			   sizeTable.put("large", "0.0 0.0 1.0");
-
-		   }*/
+			   sizeTable.put("small", "0.75 0.75 0.75");// x y z
+			   sizeTable.put("regular", "1.0 1.0 1.0");
+			   sizeTable.put("medium", "1.0 1.0 1.0");
+			   sizeTable.put("large", "1.25 1.25 1.25");
+		   }
+		  
 
 	   }
 	   
@@ -113,7 +135,7 @@ public class AttributeDefinitions {
 		   if(relativeLocation.equals("left")){
 			   x=x-1.5;
 		   }
-		   else if(relativeLocation.equals("right")){
+		   else if(relativeLocation.equals("right")||relativeLocation.equals("next")){
 			   x=x+1.5;
 		   }
 		   else if(relativeLocation.equals("above")){
@@ -128,7 +150,79 @@ public class AttributeDefinitions {
 			   }
 		   }
 		   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){ //Need reconsideration
-			   y=y-1.5;
+/*			   if(parentShape.equals("table")||parentShape.equals("chair")||parentShape.equals("bed")){
+				   x=x+0.5;
+				   //y=y;
+			   }else{
+				   y=y-0.5;
+			   }*/
+			   if(shape.equals("box")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double radius =Double.parseDouble(sSplit[1]);
+				   if(parentShape.equals("table")){
+					   y=y+radius/2;
+					   
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+radius/2;
+					   
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y-0.5;
+				   }
+				   else if(parentShape.equals("bed")){
+					   y=y+radius/2;
+				   }
+				   else{
+					   y=y-0.5;
+				   }
+			   }
+			   else if(shape.equals("sphere")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double radius =Double.parseDouble(sSplit[1]);
+				   if(parentShape.equals("table")){
+					   y=y+radius;
+					   
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+radius;
+					  
+				   }
+				   else if(parentShape.equals("bed")){
+					   y=y+radius;
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y-0.5;
+				   }
+				   else{
+					   y=y-0.5;
+				   }
+			   }
+			   else if(shape.equals("cone")||shape.equals("cylinder")){
+				   String Currentsize =sizeTable.get(size);
+				   String[] sSplit  = Currentsize.split(" ");
+				   double height =Double.parseDouble(sSplit[4]);
+				   if(parentShape.equals("table")){
+					   y=y+height/2;
+					   
+				   }
+				   else if(parentShape.equals("chair")){
+					   y=y+height/2;
+					   
+				   }
+				   else if(parentShape.equals("bed")){
+					   y=y+height/2;
+				   }
+				   else if(parentShape.equals("sofa")){
+					   y=y-0.5;
+				   }
+				   else{
+					   y=y-0.5;
+				   }
+			   }
+		   
 		   }
 		   else if(relativeLocation.equals("front")){
 			   z=z+1.5;
@@ -227,15 +321,15 @@ public class AttributeDefinitions {
 			   if(relativeLocation.equals("left")){
 				   x1=x1-1.5;
 			   }
-			   else if(relativeLocation.equals("right")){
+			   else if(relativeLocation.equals("right")||relativeLocation.equals("next")){
 				   x1=x1+1.5;
 			   }
 			   else if(relativeLocation.equals("above")){
 				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   //y1=y1-1.5;
-				   x1=x1+0.25;
+				   y1=y1-1.5;
+				   //x1=x1+0.25;
 			   }
 			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 				   y1=y1+0.2;
@@ -264,15 +358,15 @@ public class AttributeDefinitions {
 			   if(relativeLocation.equals("left")){
 				   x1=x1-2;
 			   }
-			   else if(relativeLocation.equals("right")){
+			   else if(relativeLocation.equals("right")||relativeLocation.equals("next")){
 				   x1=x1+2;
 			   }
 			   else if(relativeLocation.equals("above")){
 				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   //y1=y1-1.5;
-				   x1=x1+0.25;
+				   y1=y1-1.5;
+				   //x1=x1+0.25;
 			   }
 			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 				   y1=y1+0.2;
@@ -299,15 +393,15 @@ public class AttributeDefinitions {
 			   if(relativeLocation.equals("left")){
 				   x1=x1-1.5;
 			   }
-			   else if(relativeLocation.equals("right")){
+			   else if(relativeLocation.equals("right")||relativeLocation.equals("next")){
 				   x1=x1+1.5;
 			   }
 			   else if(relativeLocation.equals("above")){
 				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   //y1=y1-1.5;
-				   x1=x1+0.25;
+				   y1=y1-1.5;
+				   //x1=x1+0.25;
 			   }
 			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
 				   y1=y1+0.2;
@@ -342,14 +436,14 @@ public class AttributeDefinitions {
 			   if(relativeLocation.equals("left")){
 				   x1=x1-0.3;
 			   }
-			   else if(relativeLocation.equals("right")){
+			   else if(relativeLocation.equals("right")||relativeLocation.equals("next")){
 				   x1=x1+0.3;
 			   }
 			   else if(relativeLocation.equals("above")){
 				   y1=y1+1.5;
 			   }
 			   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
-				   //y1=y1-1.5;
+				   y1=y1-1.5;
 				   x1=x1+0.25;
 			   }
 			   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
@@ -373,6 +467,47 @@ public class AttributeDefinitions {
 			   }			   
 			   newCordinates = x1+" "+y1+" "+z1;			   
 		   }
+
+			   else if(shape.equals("ceilingLamp")){
+
+				   //Parent cordinates
+				   String arr1[]=parentCordinates.split(" ");
+				   double x1 = Double.parseDouble(arr1[0]);
+				   double y1 = Double.parseDouble(arr1[1]);
+				   double z1 = Double.parseDouble(arr1[2]);
+				   			   			   
+				   //old cordinates are the cordinates of the object relative to origin
+				   String arr2[]=currentCordinates.split(" ");
+				   double x2 = Double.parseDouble(arr2[0]);
+				   double y2 = Double.parseDouble(arr2[1]);
+				   double z2 = Double.parseDouble(arr2[2]);
+				   			   			   
+/*				   if(relativeLocation.equals("left")){
+					   x1=x1-2;
+				   }*/
+				   if(relativeLocation.equals("right")||relativeLocation.equals("next")){
+					   x1=x1+2;
+				   }
+/*				   else if(relativeLocation.equals("above")){
+					   y1=y1+2;
+				   }
+				   else if(relativeLocation.equals("below")||relativeLocation.equals("under")){
+					   y1=y1-1.5;
+					   //x1=x1+0.25;
+				   }
+				   else if(relativeLocation.equals("on")||relativeLocation.equals("top")){
+					   y1=y1+0.2;
+				   }
+				   else if(relativeLocation.equals("front")){
+					   z1=z1+1.5;
+				   }
+				   else if(relativeLocation.equals("behind")){
+					   z1=z1-1.5;
+				   }*/
+				   
+				   newCordinates = x1+" "+"2.0"+" "+z1;			   
+			   }
+		   
 		   return newCordinates;
 	   }
 }

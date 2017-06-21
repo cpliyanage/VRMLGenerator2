@@ -31,38 +31,33 @@ public class ObjectIdentifier {
 		objectInMiddle=false;
 		objectInLeft=false;
 		objectInRight=false;
+		int childCount = tree.getChildCount();
+		String roomColour = "1 0.87 0.67";
+		AttributeDefinitions roomAttributes = new AttributeDefinitions();
+		roomAttributes.initializeRoomColours();
+		
+	    if (!(childCount == 0)) {
+	        for (int i = 0; i < childCount; i++) {
+	            VRMLNode currentNode = tree.nodes.get(i);
+	            if(currentNode.isRoot()){
+	            	if(!(currentNode.colour==null)&& !(currentNode.colour.equals(""))){
+	            		roomColour=roomAttributes.roomColourTable.get(currentNode.colour);
+	            	}
+	            }
+	        }
+	    } 
+	    
 		writer= new PrintWriter("generated.wrl");
 		writer.println("#VRML V2.0 utf8");
 		
-		//Drawing the walls
-	/*	writer.println("Transform{ "+
-			"translation 0 0 -20.0 "+
-			"children[ "+
-			"Shape { "+
-				"appearance Appearance { "+
-					"material Material { } "+
-				"} "+
-				"geometry Box { size 50.0 20.0 0.5 } "+
-			"} ] } "+		
-			"Transform{ "+
-			"translation -25.0 0 -10.0 "+
-			"children[ "+
-			"Shape { "+
-				"appearance Appearance { "+
-				"} "+
-				"geometry Box { size 0.5 20.0 20.0 } "+
-			"}]} "+			
-			"Transform{ "+
-			"translation 25.0 0 -10.0 "+
-			"children[ "+
-			"Shape { "+
-				"appearance Appearance { "+
-				"} "+
-				"geometry Box {size 0.5 20.0 20.0 } "+
-			"}]} "); */
+		//Setting the background
+		writer.println(" Viewpoint { orientation 0 0 0 0 position 0 1 4 description \"vista\" } ");
+		writer.println("Transform { children [ DEF pontodeluz PointLight { color 1 0.918 0.765 on TRUE location 3.17 3.55 5.66 intensity 1 } ] } ");  
+		writer.println("Background { skyColor [ "+roomColour+" ] skyAngle [] groundColor[ "+roomColour+" ] groundAngle[] }");
+		writer.println("Transform { translation 0 -0.2 0 children [ Shape { appearance Appearance { texture ImageTexture{url \"floor2.jpg\" } } geometry Box { size 500 0.1 100 } } ] } ");
 		
 	    // identifying root node
-	    int childCount = tree.getChildCount();
+	    
 	    if (!(childCount == 0)) {
 	        for (int i = 0; i < childCount; i++) {
 	            VRMLNode currentNode = tree.nodes.get(i);
@@ -593,10 +588,10 @@ public class ObjectIdentifier {
 		}*/
 		
 		//Draw Lamp
-		else if(!(node.name==null)&& (node.name).equalsIgnoreCase("lamp")){
+		else if(!(node.name==null)&& ((node.name).equalsIgnoreCase("lamp"))){
 			if((!(node.type==null)) && node.type.equals("ceiling")){
 				System.out.println("Ceiling lamp present");
-				codeGenerator.drawCeilingLamp();
+				codeGenerator.drawCeilingLamp(parentCordinates,relativeLocation,parentShape);
 			} else if((!(node.type==null)) && node.type.equals("table")){
 				System.out.println("Table lamp present");
 				String drawnCordinates="0 0 0";
@@ -665,6 +660,22 @@ public class ObjectIdentifier {
 						isFirstObject=false;
 					}
 				}
+			}
+		}
+		
+		//Draw Bulb
+		else if((!(node.name==null)) && (node.name).equalsIgnoreCase("bulb")){
+			System.out.println("Ceiling lamp present");
+			String drawnCordinates="0 0 0";
+			for(int k=1;k<=node.count;k++){
+				if(k==1){//FirstObject
+					drawnCordinates=codeGenerator.drawCeilingLamp(parentCordinates,relativeLocation,parentShape);
+					node.setCordinates(drawnCordinates);
+					
+				}else{
+						drawnCordinates=codeGenerator.drawCeilingLamp(drawnCordinates,"right","ceilingLamp");
+						node.setCordinates(drawnCordinates);
+					}			
 			}
 		}
 		

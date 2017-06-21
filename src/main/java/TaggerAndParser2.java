@@ -34,7 +34,7 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.CoreMap;
 import edu.stanford.nlp.ie.NumberNormalizer;
 
-public class TaggerAndParser {
+public class TaggerAndParser2 {
 		
 	//Hashmap to store coreference resolution results. Key=Object Id, Value=List of mentions of that object
 	HashMap<String, ArrayList<ObjectMention>> objectMentionsMap;
@@ -115,34 +115,9 @@ public class TaggerAndParser {
 				}
 		       }
 	     }
-	   //POS tagger end
-		
-/*		//POS tagger start
-		MaxentTagger tagger = new MaxentTagger("taggers/english-left3words-distsim.tagger");
-		String tagged = tagger.tagString(input);
-		//POS tagger end
-			
-		String[] taggedWords=tagged.toString().split(" ");
-		String[] current;
-		
-		for(String a:taggedWords){								
-			System.out.println(a);
-			current=a.split("_");
-			if(current[1].equals("NN")||current[1].equals("NNS")){
-				nounsPresent.add(current[0]);
-			}
-			if(current[1].equals("JJ")){
-				adjectivesPresent.add(current[0]);
-			}
-			//if(current[1].equals("NN")&&Arrays.asList(objects).contains(current[0])){
-			//objectNames.add(current[0]);		
-			//currentNode = new VRMLNode(current[0]);
-			//objectMap.put(current[0], currentNode);
-			//} 
-		}
-		
-		System.out.println(tagged.toString()); */
-		
+	     //POS Tagger end
+	     System.out.println("");
+	     
 	     //Create a node for the room
 	     VRMLNode roomNode=new VRMLNode("object0");
 	     roomNode.name="room";
@@ -186,9 +161,20 @@ public class TaggerAndParser {
 	    	    		 //text part of the mention
 	    	    		 cSplit[0]=cSplit[0].substring(1, cSplit[0].length()-1);//removing quotes
 	    	    		 String[] words=cSplit[0].split(" ");
-	    	    		
+	    	    		 ObjectMention currentMention= new ObjectMention();
 	    	    		 //For each word of a mention
 	    		    	for(String word:words){
+	    		    		if(adjectivesPresent.contains(word)){
+	    		    			if((Arrays.asList(colours).contains(word))){
+	    		    				currentMention.colour=word;
+		   		    			 }else if((Arrays.asList(types).contains(word))){
+		   		    				currentMention.type=word;
+		   		    			 }else if((Arrays.asList(sizes).contains(word))){
+		   		    				currentMention.size=word;
+		   		    			 }else if((Arrays.asList(textures).contains(word))){
+		   		    				currentMention.texture=word;
+		   		    			 }
+		    		    	}
 	    		    		if(nounsPresent.contains(word)||Arrays.asList(pronouns).contains(word)){	 
 	    						 String stemWord=word;
 	    						 
@@ -199,10 +185,9 @@ public class TaggerAndParser {
 	    						 }
 	    						 
 	    		    			 if(Arrays.asList(objects).contains(stemWord)||Arrays.asList(pronouns).contains(stemWord)){
-	    		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber);
+	    		    				 boolean objectPresent=checkObjectPresent(stemWord,sentenceNumber,currentMention.colour,currentMention.type,currentMention.size,currentMention.texture);
 	    		    				 if(!objectPresent){
-	    		    				 //Adding the mention of the object to the mentions list
-	    		    		    	 ObjectMention currentMention= new ObjectMention();
+	    		    				 //Adding the mention of the object to the mentions list	    		    		    	
 	    		    		    	 currentMention.name=stemWord;
 	    		    		    	 currentMention.sentence=sentenceNumber;
 	    		    		    	 mentionsList.add(currentMention);
@@ -213,10 +198,9 @@ public class TaggerAndParser {
 	    		    				 //Check synonyms to get the object name
 	    			    				 String synonym =getSynonyms(dict,stemWord,"object");
 	    			    				 if(!(synonym.equals(""))){
-	    				    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber);
+	    				    				 boolean objectPresent=checkObjectPresent(synonym,sentenceNumber,currentMention.colour,currentMention.type,currentMention.size,currentMention.texture);
 	    				    				 if(!objectPresent){
-	    				    				 //Adding the mention of the object to the mentions list
-	    				    		    	 ObjectMention currentMention= new ObjectMention();
+	    				    				 //Adding the mention of the object to the mentions list	    				    		    	 
 	    				    		    	 currentMention.name=synonym;
 	    				    		    	 currentMention.sentence=sentenceNumber;
 	    				    		    	 mentionsList.add(currentMention);
@@ -227,10 +211,9 @@ public class TaggerAndParser {
 	    		    					 //Check Hypernyms to get object name
 	    				    					 String hypernym=getHypernyms(dict,stemWord,"object");
 	    				    					 if(!hypernym.equals("")){
-	    						    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber);
+	    						    				 boolean objectPresent=checkObjectPresent(hypernym,sentenceNumber,currentMention.colour,currentMention.type,currentMention.size,currentMention.texture);
 	    						    				 if(!objectPresent){
 	    						    				 //Adding the mention of the object to the mentions list
-	    						    		    	 ObjectMention currentMention= new ObjectMention();
 	    						    		    	 currentMention.name=hypernym;
 	    						    		    	 currentMention.sentence=sentenceNumber;
 	    						    		    	 mentionsList.add(currentMention);
@@ -2388,12 +2371,12 @@ public class TaggerAndParser {
     }
     
     //Method to check whether the object is already added
-    public boolean checkObjectPresent(String objName, int sentenceNum){    	
+    public boolean checkObjectPresent(String objName, int sentenceNum,String colour,String type,String size,String texture){    	
     	boolean objectPresent=false;		
     	for (Entry<String, ArrayList<ObjectMention>> obj : objectMentionsMap.entrySet()) {		    
 		    ArrayList<ObjectMention> objMentions = obj.getValue();
 		    for(ObjectMention objMention:objMentions){
-		    	if((objMention.name.equals(objName))&&(objMention.sentence==sentenceNum)){
+		    	if((objMention.name.equals(objName))&&(objMention.sentence==sentenceNum)&&(objMention.colour.equals(colour))&&(objMention.type.equals(type))&&(objMention.size.equals(size))&&(objMention.texture.equals(texture))){
 		    		objectPresent=true;
 		    	}
 		    }

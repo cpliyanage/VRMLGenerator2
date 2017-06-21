@@ -209,6 +209,9 @@ public class CodeGenerator {
 		String cordinates= "0.0 0.0 0.0";//"0.0 0.0 0.0"
 		//String[] cordinates={"0.0 0.615 0.0","0.0 0.3075 0.0","0.0 0.015 0.0","0.0 0.045 0.0"};
 		
+		attributes.initializeSizes("table");
+		String scale=attributes.sizeTable.get(size);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"roundTable",cordinates,parentShape);
 		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
@@ -225,6 +228,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("#Round Table");
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
+			" scale "+scale+
 			" rotation "+rotation+
 			" children [ "+
 			"Transform {"+
@@ -285,6 +289,9 @@ public class CodeGenerator {
 		String cordinates="0.0 0.0 0.0";
 		//String[] cordinates={"0.0 0.615 0.0","0.4 0.3075 0.4","-0.4 0.3075 -0.4","0.4 0.3075 -0.4","-0.4 0.3075 0.4"};
 		
+		attributes.initializeSizes("table");
+		String scale=attributes.sizeTable.get(size);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"squareTable",cordinates,parentShape);
 		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
@@ -302,6 +309,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+cordinates+
 			" rotation "+rotation+
+			" scale "+scale+
 			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
@@ -374,6 +382,9 @@ public class CodeGenerator {
 		String cordinates= "0.0 0.0 0.0";
 		//String[] cordinates={"0.0 0.5 0.0","0.1575 0.2485 0.1575","-0.1575 0.2485 0.1575","-0.1575 0.2485 -0.1575","0.1575 0.2485 -0.1575","0.1875 0.5 0.0","0.0 0.54 0.0","0.0 0.2275 0.0","0.0 0.2275 -0.083","0.0 0.2275 0.083","0.0 0.2275 -0.166","0.0 0.2275 0.166"};
 
+		attributes.initializeSizes("chair");
+		String scale=attributes.sizeTable.get(size);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"chair",cordinates,parentShape);
 		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
@@ -391,6 +402,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("Transform { "+
 				"translation "+cordinates+
 				" rotation "+rotation+//0 1 0 1.57
+				" scale "+scale+
 				" children [ "+
 					"Transform {"+ //chair seat
 				    "translation 0.0 0.5 0.0"+
@@ -476,6 +488,9 @@ public class CodeGenerator {
 		String rotation=attributes.orientationTable.get(orientation);
 		String cordinates="0.0 0.0 0.0";
 		
+		attributes.initializeSizes("sofa");
+		String scale=attributes.sizeTable.get(size);
+		
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"sofa",cordinates,parentShape);
 		}else if(!(absoluteCordinates==null)&&!(absoluteCordinates.equals(""))){
@@ -493,6 +508,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
 		    " rotation "+rotation+
+		    " scale "+scale+
 			" children [ "+
 		        "Shape { "+ //sofa seat
 		            "appearance DEF "+colour+" Appearance { "+
@@ -517,13 +533,45 @@ public class CodeGenerator {
 	}
 	
 	//Object Ceiling Lamp
-	public void drawCeilingLamp() throws IOException{
+	public String drawCeilingLamp(String parentCordinates, String relativeLocation,String parentShape) throws IOException{
+		AttributeDefinitions attributes= new AttributeDefinitions();
+		String cordinates="0.0 2.0 0.0";
+		
+		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
+			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"ceilingLamp",cordinates,parentShape);
+		}
+		
 		ObjectIdentifier.writer.println("#Ceiling Lamp");
-		ObjectIdentifier.writer.println("Inline { "+
+/*		ObjectIdentifier.writer.println("Inline { "+
 			   "url      \"ceilingLamp.wrl\" "+
 			   "bboxSize 0.5 2.5 0.5 "+
-			"}");
+			"}");*/
+		ObjectIdentifier.writer.println(" Transform { "+
+			" translation "+ cordinates+
+			" scale 0.5 0.5 0.5 "+
+			" children[ "+
+				" Shape { "+
+					"appearance Appearance { "+
+						" material Material { "+
+							" diffuseColor 1.0 1.0 0.0 "+
+						" } "+
+					" } "+
+					" geometry Sphere {radius 0.2 } "+
+				" } "+
+				" Transform{ "+
+					" translation 0 0.1 0 "+
+					" children[ "+
+						"Shape { "+
+							" appearance Appearance { "+
+								" material Material { "+ 
+									" diffuseColor 0.5 0.5 0.5 "+
+								" } } "+
+							" geometry Cylinder { "+
+								" radius 0.1 height 0.5 side TRUE bottom TRUE top TRUE } "+
+							" } ] } ] } ");
+		
 		System.out.println("Ceiling lamp drawn successfully!");
+		return cordinates;
 	}
 	
 	//Object Table Lamp
@@ -649,6 +697,9 @@ public class CodeGenerator {
 		String cordinates="0.0 0.0 0.0";
 		//String[] cordinates={"0.0 0.615 0.0","0.0 0.815 1.0","0.4 0.3075 1.0","-0.4 0.3075 -0.8","0.4 0.3075 -0.8","-0.4 0.3075 1.0"};
 		
+		attributes.initializeSizes("bed");
+		String scale=attributes.sizeTable.get(size);
+		
 		//check whether relative location is given
 		if(!parentCordinates.equals(null)&&!parentCordinates.equals("")&&!relativeLocation.equals(null)&&!relativeLocation.equals("")){
 			cordinates=attributes.getLocationOfCustomObject(parentCordinates, relativeLocation,"bed",cordinates,parentShape);
@@ -667,6 +718,7 @@ public class CodeGenerator {
 		ObjectIdentifier.writer.println("Transform { "+
 			"translation "+ cordinates+
 			" rotation "+rotation+//0 1 0 3
+			" scale "+scale+
 			" children [ "+
 			"Transform {"+
 		    "translation 0.0 0.615 0.0"+
