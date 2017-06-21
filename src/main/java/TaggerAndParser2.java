@@ -167,14 +167,73 @@ public class TaggerAndParser2 {
 	    		    		if(adjectivesPresent.contains(word)){
 	    		    			if((Arrays.asList(colours).contains(word))){
 	    		    				currentMention.colour=word;
-		   		    			 }else if((Arrays.asList(types).contains(word))){
+		   		    			 } else{
+	    		    				 //Check synonyms to get the object name
+    			    				 String synonym =getSynonyms(dict,word,"colour");
+    			    				 if(!(synonym.equals(""))){
+    			    					 currentMention.colour=synonym;
+    			    				 }
+    		    				 else{
+    		    					 //Check Hypernyms to get object name
+    				    					 String hypernym=getHypernyms(dict,word,"colour");
+    				    					 if(!hypernym.equals("")){
+    				    						 currentMention.colour=hypernym;
+    				    					 }			    			
+    				    				}
+    		    				 }
+	    		    			
+	    		    			if((Arrays.asList(types).contains(word))){
 		   		    				currentMention.type=word;
-		   		    			 }else if((Arrays.asList(sizes).contains(word))){
+		   		    			 }else{
+	    		    				 //Check synonyms to get the object name
+    			    				 String synonym =getSynonyms(dict,word,"type");
+    			    				 if(!(synonym.equals(""))){
+    			    					 currentMention.type=synonym;
+    			    				 }
+    		    				 else{
+    		    					 //Check Hypernyms to get object name
+    				    					 String hypernym=getHypernyms(dict,word,"type");
+    				    					 if(!hypernym.equals("")){
+    				    						 currentMention.type=hypernym;
+    				    					 }			    			
+    				    				}
+    		    				 }
+	    		    			
+	    		    			if((Arrays.asList(sizes).contains(word))){
 		   		    				currentMention.size=word;
-		   		    			 }else if((Arrays.asList(textures).contains(word))){
+		   		    			 }else{
+	    		    				 //Check synonyms to get the object name
+    			    				 String synonym =getSynonyms(dict,word,"size");
+    			    				 if(!(synonym.equals(""))){
+    			    					 currentMention.size=synonym;
+    			    				 }
+    		    				 else{
+    		    					 //Check Hypernyms to get object name
+    				    					 String hypernym=getHypernyms(dict,word,"size");
+    				    					 if(!hypernym.equals("")){
+    				    						 currentMention.size=hypernym;
+    				    					 }			    			
+    				    				}
+    		    				 }
+	    		    			
+	    		    			if((Arrays.asList(textures).contains(word))){
 		   		    				currentMention.texture=word;
-		   		    			 }
+		   		    			 }else{
+	    		    				 //Check synonyms to get the object name
+    			    				 String synonym =getSynonyms(dict,word,"texture");
+    			    				 if(!(synonym.equals(""))){
+    			    					 currentMention.texture=synonym;
+    			    				 }
+    		    				 else{
+    		    					 //Check Hypernyms to get object name
+    				    					 String hypernym=getHypernyms(dict,word,"texture");
+    				    					 if(!hypernym.equals("")){
+    				    						 currentMention.texture=hypernym;
+    				    					 }			    			
+    				    				}
+    		    				 }
 		    		    	}
+	    		    		
 	    		    		if(nounsPresent.contains(word)||Arrays.asList(pronouns).contains(word)){	 
 	    						 String stemWord=word;
 	    						 
@@ -519,8 +578,10 @@ public class TaggerAndParser2 {
 							   if(!(objectId1.equals(""))){
 								   modifiedNode=objectMap.get(objectId1);
 								   if(!(modifiedNode==null)){
-									   modifiedNode.colour=word2Name;
-									   objectMap.put(objectId1, modifiedNode);	
+									   if(modifiedNode.colour==null){
+										   modifiedNode.colour=word2Name;
+										   objectMap.put(objectId1, modifiedNode);
+									   }
 								   }
 							   }
 							  						   
@@ -532,8 +593,10 @@ public class TaggerAndParser2 {
 									   if(!(objectId1.equals(""))){
 										   modifiedNode=objectMap.get(objectId1);
 										   if(!(modifiedNode==null)){
-											   modifiedNode.colour=synonym;
-											   objectMap.put(objectId1, modifiedNode);
+											   if(modifiedNode.colour==null){
+												   modifiedNode.colour=synonym;
+												   objectMap.put(objectId1, modifiedNode);
+											   }
 										   }
 									   }
 				    			}else{
@@ -544,8 +607,10 @@ public class TaggerAndParser2 {
 										   if(!(objectId1.equals(""))){
 											   modifiedNode=objectMap.get(objectId1);
 											   if(!(modifiedNode==null)){
-												   modifiedNode.colour=hypernym;
-												   objectMap.put(objectId1, modifiedNode);
+												   if(modifiedNode.colour==null){
+													   modifiedNode.colour=hypernym;
+													   objectMap.put(objectId1, modifiedNode);
+												   }
 											   }
 										   }
 				    				 }			    				 
@@ -559,8 +624,10 @@ public class TaggerAndParser2 {
 							   if(!(objectId1.equals(""))){
 								   modifiedNode=objectMap.get(objectId1);
 								   if(!(modifiedNode==null)){
+									   if(modifiedNode.texture==null){
 									   modifiedNode.texture=word2Name;
 									   objectMap.put(objectId1, modifiedNode);
+									   }
 								   }
 							   } 
 						   }else{
@@ -571,8 +638,10 @@ public class TaggerAndParser2 {
 									   if(!(objectId1.equals(""))){
 										   modifiedNode=objectMap.get(objectId1);
 										   if(!(modifiedNode==null)){
+											   if(modifiedNode.texture==null){
 											   modifiedNode.texture=synonym;
 											   objectMap.put(objectId1, modifiedNode);
+											   }
 										   }
 									   }
 				    			}else{
@@ -583,8 +652,10 @@ public class TaggerAndParser2 {
 										   if(!(objectId1.equals(""))){
 											   modifiedNode=objectMap.get(objectId1);
 											   if(!(modifiedNode==null)){
+												   if(modifiedNode.texture==null){
 												   modifiedNode.texture=hypernym;
 												   objectMap.put(objectId1, modifiedNode);
+												   }
 											   }
 										   }
 				    				 }			    				 
@@ -597,8 +668,10 @@ public class TaggerAndParser2 {
 							   if(!(objectId1.equals(""))){
 								   modifiedNode=objectMap.get(objectId1);
 								   if(!(modifiedNode==null)){
+									   if(modifiedNode.size==null){
 									   modifiedNode.size=word2Name;
 									   objectMap.put(objectId1, modifiedNode);
+									   }
 								   }
 							   }
 						   }else{
@@ -609,8 +682,10 @@ public class TaggerAndParser2 {
 									   if(!(objectId1.equals(""))){
 										   modifiedNode=objectMap.get(objectId1);
 										   if(!(modifiedNode==null)){
+											   if(modifiedNode.size==null){
 											   modifiedNode.size=synonym;
 											   objectMap.put(objectId1, modifiedNode);
+											   }
 										   }
 									   }
 				    			}else{
@@ -621,8 +696,10 @@ public class TaggerAndParser2 {
 										   if(!(objectId1.equals(""))){
 											   modifiedNode=objectMap.get(objectId1);
 											   if(!(modifiedNode==null)){
+												   if(modifiedNode.size==null){
 												   modifiedNode.size=hypernym;
 												   objectMap.put(objectId1, modifiedNode);
+												   }
 											   }
 										   }
 				    				 }			    				 
@@ -636,8 +713,10 @@ public class TaggerAndParser2 {
 							   if(!(objectId1.equals(""))){
 								   modifiedNode=objectMap.get(objectId1);
 								   if(!(modifiedNode==null)){
+									   if(modifiedNode.type==null){
 									   modifiedNode.type=word2Name;
 									   objectMap.put(objectId1, modifiedNode);
+									   }
 								   }
 							   }
 						   }else{
@@ -648,8 +727,10 @@ public class TaggerAndParser2 {
 									   if(!(objectId1.equals(""))){
 										   modifiedNode=objectMap.get(objectId1);
 										   if(!(modifiedNode==null)){
+											   if(modifiedNode.type==null){
 											   modifiedNode.type=synonym;
 											   objectMap.put(objectId1, modifiedNode);
+											   }
 										   }
 									   }
 				    			}else{
@@ -660,8 +741,10 @@ public class TaggerAndParser2 {
 										   if(!(objectId1.equals(""))){
 											   modifiedNode=objectMap.get(objectId1);
 											   if(!(modifiedNode==null)){
+												   if(modifiedNode.type==null){
 												   modifiedNode.type=hypernym;
 												   objectMap.put(objectId1, modifiedNode);
+												   }
 											   }
 										   }
 				    				 }			    				 
